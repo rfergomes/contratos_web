@@ -223,7 +223,7 @@
                             </li>
                         @endif
 
-                        @if(auth()->user()->isGestor())
+                        @if(auth()->user()->isGestor() || auth()->user()->isSuperAdmin())
                             <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Gestão de Contratos</div>
                             
                             <li class="nav-item">
