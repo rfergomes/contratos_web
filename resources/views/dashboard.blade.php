@@ -161,7 +161,7 @@
 
     <!-- Visão Geral de Contratos / Pendências -->
     <div class="row">
-        <!-- Tabela de Contratos Recentes -->
+        <!-- Contratos Recentes (Cards responsivos) -->
         <div class="col-lg-8 col-12 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header border-0 bg-white py-3">
@@ -180,63 +180,56 @@
                             <p class="text-muted mb-0">Nenhum contrato ativo ou registrado.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nº Contrato</th>
-                                        <th>Objeto / Título</th>
-                                        @if(auth()->user()->isSuperAdmin())
-                                            <th>Empresa</th>
-                                        @endif
-                                        @if(!auth()->user()->isFornecedor())
-                                            <th>Fornecedor</th>
-                                        @endif
-                                        <th>Vigência</th>
-                                        <th class="text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($recentContracts as $contract)
-                                        <tr onclick="window.location='{{ route('contracts.show', $contract) }}'" style="cursor: pointer;">
-                                            <td><strong>{{ $contract->contract_number }}</strong></td>
-                                            <td>
-                                                <div class="fw-bold">{{ $contract->title }}</div>
-                                                <div class="text-muted fs-8">{{ Str::limit($contract->description, 60) }}</div>
-                                            </td>
-                                            @if(auth()->user()->isSuperAdmin())
-                                                <td>{{ $contract->company->name ?? 'N/A' }}</td>
-                                            @endif
-                                            @if(!auth()->user()->isFornecedor())
-                                                <td>{{ $contract->provider->name ?? 'N/A' }}</td>
-                                            @endif
-                                            <td class="fs-7">
-                                                {{ $contract->start_date->format('d/m/Y') }} a {{ $contract->end_date->format('d/m/Y') }}
-                                            </td>
-                                            <td class="text-center">
+                        {{-- Cards responsivos: funcionam bem em mobile e desktop --}}
+                        @foreach($recentContracts as $contract)
+                            @php
+                                $statusColor = match($contract->status) {
+                                    'active'    => '#28a745',
+                                    'pending'   => '#0dcaf0',
+                                    'expired'   => '#dc3545',
+                                    'suspended' => '#ffc107',
+                                    default     => '#6c757d',
+                                };
+                            @endphp
+                            <a href="{{ route('contracts.show', $contract) }}" class="d-block text-decoration-none border-bottom dashboard-contract-row" style="border-left: 4px solid {{ $statusColor }} !important;">
+                                <div class="px-3 py-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="min-w-0 flex-grow-1 me-2">
+                                            <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                                <span class="fw-bold text-dark fs-7">{{ $contract->contract_number }}</span>
                                                 @switch($contract->status)
-                                                    @case('pending')
-                                                        <span class="badge bg-info">Pendente</span>
-                                                        @break
-                                                    @case('active')
-                                                        <span class="badge bg-success">Ativo</span>
-                                                        @break
-                                                    @case('expired')
-                                                        <span class="badge bg-danger">Vencido</span>
-                                                        @break
-                                                    @case('suspended')
-                                                        <span class="badge bg-warning text-dark">Suspenso</span>
-                                                        @break
-                                                    @case('draft')
-                                                        <span class="badge bg-secondary">Rascunho</span>
-                                                        @break
+                                                    @case('pending')  <span class="badge bg-info">Pendente</span> @break
+                                                    @case('active')   <span class="badge bg-success">Ativo</span> @break
+                                                    @case('expired')  <span class="badge bg-danger">Vencido</span> @break
+                                                    @case('suspended')<span class="badge bg-warning text-dark">Suspenso</span> @break
+                                                    @case('draft')    <span class="badge bg-secondary">Rascunho</span> @break
                                                 @endswitch
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                            <div class="fw-semibold text-dark fs-7">{{ $contract->title }}</div>
+                                            <div class="text-muted fs-8">{{ Str::limit($contract->description, 60) }}</div>
+                                            <div class="text-muted fs-8 mt-1">
+                                                @if(!auth()->user()->isFornecedor())
+                                                    <i class="fa-solid fa-user me-1"></i>
+                                                    <span>Resp: {{ $contract->responsible->name ?? 'N/A' }}</span>
+                                                @endif
+                                                <i class="fa-solid fa-bell ms-2 me-1 text-warning"></i>
+                                                <span>Alerta: {{ $contract->alert_days }} dias</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end flex-shrink-0">
+                                            @if(!auth()->user()->isFornecedor())
+                                                <div class="fw-semibold text-dark fs-8">{{ Str::limit($contract->provider->name ?? 'N/A', 15) }}</div>
+                                                <div class="text-muted fs-8">{{ $contract->provider->cnpj ?? '' }}</div>
+                                            @endif
+                                            <div class="text-muted fs-8 mt-1">
+                                                {{ $contract->start_date->format('d/m/y') }}<br>
+                                                <span class="text-muted">a {{ $contract->end_date->format('d/m/y') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
                     @endif
                 </div>
             </div>

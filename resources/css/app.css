@@ -296,19 +296,104 @@ body {
     box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2);
 }
 
-/* --- MOBILE: forçar cards, ocultar tabela e toggle --- */
+/* --- DASHBOARD: linha de contrato clicável --- */
+.dashboard-contract-row {
+    color: inherit;
+    transition: background-color 0.15s ease;
+}
+.dashboard-contract-row:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- RESPONSIVIDADE GLOBAL MOBILE-FIRST --- */
+
+/* Esconde o toggle de visualização em mobile (forçamos card view via CSS) */
 @media (max-width: 767.98px) {
-    /* Oculta a tabela e mostra os cards automaticamente em mobile */
+
+    /* Listagens: forçar cards, ocultar tabela e toggle */
     #view-table-container {
         display: none !important;
     }
     #view-card-container {
         display: block !important;
     }
-    /* Oculta o botão alternador em mobile (cards é o único modo) */
     .view-mode-toggle-wrapper {
         display: none !important;
     }
+
+    /* Card headers com múltiplos botões: empilhar verticalmente */
+    .card-header .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Stepper horizontal: scroll lateral em vez de overflow cortado */
+    .stepper-horizontal {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .stepper-item {
+        min-width: 100px;
+    }
+
+    /* Timeline horizontal: padding reduzido */
+    .timeline-horizontal-wrapper {
+        padding: 15px 8px;
+    }
+    .timeline-horizontal-item {
+        width: 220px;
+        margin-right: 20px;
+    }
+
+    /* Tabelas: scroll lateral suave */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Modais: tela cheia em mobile */
+    .modal-dialog {
+        margin: 0;
+        max-width: 100%;
+    }
+    .modal-content {
+        border-radius: 0;
+        min-height: 100dvh;
+    }
+
+    /* Botões de ação empilhados em mobile */
+    .btn-group-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* Small box widgets: altura mínima menor */
+    .small-box.card {
+        min-height: 90px;
+    }
+    .small-box .inner h3 {
+        font-size: 1.8rem;
+    }
+    .small-box .inner p {
+        font-size: 0.75rem;
+    }
+    .small-box .icon {
+        font-size: 2rem !important;
+    }
 }
+
+/* Telas intermediárias (tablets) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .stepper-horizontal {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    .stepper-item {
+        min-width: 110px;
+    }
+}
+
 
 
