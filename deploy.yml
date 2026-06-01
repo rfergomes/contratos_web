@@ -1,0 +1,21 @@
+name: Deploy VPS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: 191.252.205.40
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo -u deploy /var/www/deploy_contratos.sh
+            cd /var/www/contratos_web/current && git log -1 --format="%h (%cd)" --date=format:"%d/%m %H:%M" > .version

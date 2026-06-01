@@ -1,0 +1,21 @@
+/* Import AdminLTE 4 (Bootstrap 5) */
+@import 'admin-lte/dist/css/adminlte.min.css';
+
+/* Import SweetAlert2 */
+@import 'sweetalert2/dist/sweetalert2.min.css';
+
+/* Import Toastr */
+@import 'toastr/build/toastr.min.css';
+
+/* Import Google Fonts (Outfit or Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Estilos Globais Personalizados */
+body {
+    font-family: 'Outfit', sans-serif;
+}
+
+.brand-link {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+}
