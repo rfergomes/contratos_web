@@ -200,29 +200,6 @@
                             </a>
                         </li>
 
-                        @if(auth()->user()->isSuperAdmin())
-                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Administrador Global</div>
-                            
-                            <li class="nav-item">
-                                <a href="{{ route('companies.index') }}" class="nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-building"></i>
-                                    <p>Empresas Contratantes</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('document-types.index') }}" class="nav-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-folder-open"></i>
-                                    <p>Tipos de Documentos</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-users"></i>
-                                    <p>Gerenciar Usuários</p>
-                                </a>
-                            </li>
-                        @endif
-
                         @if(auth()->user()->isGestor() || auth()->user()->isSuperAdmin())
                             <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Gestão de Contratos</div>
                             
@@ -241,7 +218,30 @@
                             <li class="nav-item">
                                 <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
                                     <i class="nav-icon fa-solid fa-check-double"></i>
-                                    <p>Aprovações de GED</p>
+                                    <p>Aprovações</p>
+                                </a>
+                            </li>
+                        @endif
+
+                        @if(auth()->user()->isSuperAdmin())
+                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Administrador Global</div>
+                            
+                            <li class="nav-item">
+                                <a href="{{ route('companies.index') }}" class="nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-building"></i>
+                                    <p>Empresas</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('document-types.index') }}" class="nav-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-folder-open"></i>
+                                    <p>Tipos de Documentos</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-users"></i>
+                                    <p>Usuários</p>
                                 </a>
                             </li>
                         @endif
