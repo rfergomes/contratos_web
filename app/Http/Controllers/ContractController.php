@@ -189,6 +189,60 @@ class ContractController extends Controller
             'histories.user',
         ]);
 
-        return view('contracts.show', compact('contract'));
+        $documentTypes = [];
+        if (!auth()->user()->isFornecedor()) {
+            $documentTypes = DocumentType::orderBy('name', 'asc')->get();
+        }
+
+        return view('contracts.show', compact('contract', 'documentTypes'));
+    }
+
+    /**
+     * Adiciona uma obrigação documental avulsa a um contrato existente.
+     */
+    public function addObligation(Request $request, Contract $contract)
+    {
+        $user = auth()->user();
+
+        // Apenas Gestores e SuperAdmin podem adicionar obrigações
+        if ($user->isFornecedor()) {
+            abort(403);
+        }
+
+        if ($user->isGestor() && $contract->company_id !== $user->company_id) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        $request->validate([
+            'document_type_id' => 'required|exists:document_types,id',
+            'due_date' => 'required|date|after_or_equal:today',
+        ]);
+
+        // Evita duplicar a mesma obrigação pendente/enviada para o mesmo contrato
+        $exists = ContractDocument::where('contract_id', $contract->id)
+            ->where('document_type_id', $request->document_type_id)
+            ->whereIn('status', ['pending', 'submitted'])
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Já existe essa obrigação documental pendente ou aguardando análise para este contrato.');
+        }
+
+        $doc = ContractDocument::create([
+            'contract_id' => $contract->id,
+            'document_type_id' => $request->document_type_id,
+            'due_date' => $request->due_date,
+            'status' => 'pending',
+        ]);
+
+        // Registrar no histórico do contrato
+        \App\Models\ContractHistory::log(
+            $contract->id,
+            'document_required',
+            'Nova Obrigação Exigida',
+            'Uma nova obrigação documental ("' . $doc->documentType->name . '") com vencimento em ' . $doc->due_date->format('d/m/Y') . ' foi exigida por ' . $user->name
+        );
+
+        return back()->with('success', 'Nova obrigação documental adicionada com sucesso!');
     }
 }

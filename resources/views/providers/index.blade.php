@@ -72,6 +72,13 @@
                                                             </button>
                                                         </form>
 
+                                                        <!-- Contacts Button -->
+                                                        <button type="button" class="btn btn-sm btn-outline-primary btn-contacts-provider" 
+                                                                data-id="{{ $provider->id }}"
+                                                                data-name="{{ $provider->name }}">
+                                                            <i class="fa-solid fa-users"></i> Contatos
+                                                        </button>
+
                                                         <!-- Edit Button (Abre o modal via JS populando os dados) -->
                                                         <button type="button" class="btn btn-sm btn-primary btn-edit-provider" 
                                                                 data-id="{{ $provider->id }}"
@@ -198,12 +205,76 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE CONTATOS (GERENCIAMENTO VIA AJAX) -->
+    <div class="modal fade" id="manageContactsModal" tabindex="-1" aria-labelledby="manageContactsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manageContactsModalLabel">
+                        <i class="fa-solid fa-users text-primary me-2"></i>
+                        Contatos de: <strong id="modal-provider-name"></strong>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Formulário de Adicionar/Editar Contato (Inline / Compacto) -->
+                    <form id="form-contact-ajax" class="bg-light p-3 rounded mb-4 border">
+                        @csrf
+                        <input type="hidden" id="contact_id_ajax" value="">
+                        <h6 class="fw-bold mb-3 text-secondary" id="contact-form-title">
+                            <i class="fa-solid fa-user-plus me-1 text-success"></i> Novo Contato
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-4 col-12">
+                                <input type="text" id="contact_name_ajax" class="form-control form-control-sm" placeholder="Nome Completo" required>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <input type="text" id="contact_phone_ajax" class="form-control form-control-sm" placeholder="Telefone">
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <input type="email" id="contact_email_ajax" class="form-control form-control-sm" placeholder="E-mail">
+                            </div>
+                            <div class="col-md-2 col-12 d-flex align-items-center">
+                                <div class="form-check fs-8">
+                                    <input type="checkbox" id="contact_is_main_ajax" class="form-check-input" value="1">
+                                    <label for="contact_is_main_ajax" class="form-check-label fw-bold">Principal</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" id="btn-cancel-contact-edit" class="btn btn-xs btn-secondary d-none">Cancelar Edição</button>
+                            <button type="submit" id="btn-submit-contact" class="btn btn-xs btn-success"><i class="fa-solid fa-save me-1"></i> Salvar Contato</button>
+                        </div>
+                    </form>
+
+                    <!-- Tabela de Contatos -->
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0 fs-7" id="table-contacts-ajax">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>E-mail</th>
+                                    <th class="text-center" style="width: 100px;">Principal</th>
+                                    <th class="text-end" style="width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contacts-list-container">
+                                <!-- Preenchido dinamicamente por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Modais
+            // Inicializar Modais de Fornecedores
             const createModal = new bootstrap.Modal(document.getElementById('createProviderModal'));
             const editModal = new bootstrap.Modal(document.getElementById('editProviderModal'));
             
@@ -214,7 +285,7 @@
             const editPhoneInput = document.getElementById('edit_phone');
             const editEmailInput = document.getElementById('edit_email');
 
-            // Capturar clique no botão editar
+            // Capturar clique no botão editar fornecedor
             document.querySelectorAll('.btn-edit-provider').forEach(button => {
                 button.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
@@ -237,7 +308,7 @@
                 });
             });
 
-            // Recuperar modal aberto se houver erros de validação
+            // Recuperar modal de fornecedor aberto se houver erros de validação
             @if($errors->any())
                 @if(old('_method') === 'PUT')
                     const oldId = "{{ old('provider_id') }}";
@@ -249,6 +320,233 @@
                     createModal.show();
                 @endif
             @endif
+
+            // ================= AJAX Contatos de Fornecedores =================
+            const contactsModal = new bootstrap.Modal(document.getElementById('manageContactsModal'));
+            const providerNameSpan = document.getElementById('modal-provider-name');
+            const contactsListContainer = document.getElementById('contacts-list-container');
+            const contactForm = document.getElementById('form-contact-ajax');
+            
+            const contactIdInput = document.getElementById('contact_id_ajax');
+            const contactNameInput = document.getElementById('contact_name_ajax');
+            const contactPhoneInput = document.getElementById('contact_phone_ajax');
+            const contactEmailInput = document.getElementById('contact_email_ajax');
+            const contactIsMainCheckbox = document.getElementById('contact_is_main_ajax');
+            
+            const contactFormTitle = document.getElementById('contact-form-title');
+            const btnCancelEdit = document.getElementById('btn-cancel-contact-edit');
+            const btnSubmitContact = document.getElementById('btn-submit-contact');
+            
+            let currentProviderId = null;
+
+            // Ao clicar no botão "Contatos" do fornecedor
+            document.querySelectorAll('.btn-contacts-provider').forEach(button => {
+                button.addEventListener('click', function() {
+                    const providerId = this.getAttribute('data-id');
+                    const providerName = this.getAttribute('data-name');
+                    
+                    currentProviderId = providerId;
+                    providerNameSpan.textContent = providerName;
+                    
+                    resetContactForm();
+                    loadContacts(providerId);
+                    
+                    contactsModal.show();
+                });
+            });
+
+            // Resetar o formulário de contatos
+            function resetContactForm() {
+                contactForm.reset();
+                contactIdInput.value = '';
+                contactFormTitle.innerHTML = '<i class="fa-solid fa-user-plus me-1 text-success"></i> Novo Contato';
+                btnCancelEdit.classList.add('d-none');
+                btnSubmitContact.innerHTML = '<i class="fa-solid fa-save me-1"></i> Salvar Contato';
+            }
+
+            // Cancelar edição
+            btnCancelEdit.addEventListener('click', resetContactForm);
+
+            // Carregar contatos por AJAX
+            function loadContacts(providerId) {
+                contactsListContainer.innerHTML = '<tr><td colspan="5" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin me-1 text-muted"></i> Carregando contatos...</td></tr>';
+                
+                fetch(`/providers/${providerId}/contacts`)
+                    .then(response => response.json())
+                    .then(contacts => {
+                        renderContacts(contacts);
+                    })
+                    .catch(error => {
+                        contactsListContainer.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><i class="fa-solid fa-triangle-exclamation me-1"></i> Erro ao carregar contatos.</td></tr>';
+                        console.error(error);
+                    });
+            }
+
+            // Renderizar lista de contatos
+            function renderContacts(contacts) {
+                if (contacts.length === 0) {
+                    contactsListContainer.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum contato cadastrado para este fornecedor.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                contacts.forEach(contact => {
+                    const isMainChecked = contact.is_main ? 'checked' : '';
+                    const phone = contact.phone ? contact.phone : 'N/A';
+                    const email = contact.email ? contact.email : 'N/A';
+                    
+                    html += `
+                        <tr id="contact-row-${contact.id}">
+                            <td><strong>${contact.name}</strong></td>
+                            <td>${phone}</td>
+                            <td>${email}</td>
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input chk-toggle-main" data-id="${contact.id}" ${isMainChecked}>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-xs btn-primary btn-edit-contact-ajax" data-contact='${JSON.stringify(contact)}' title="Editar Contato">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-xs btn-danger btn-delete-contact-ajax" data-id="${contact.id}" title="Excluir Contato">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                contactsListContainer.innerHTML = html;
+                bindContactEvents();
+            }
+
+            // Bind dos botões de ação na tabela de contatos
+            function bindContactEvents() {
+                // Alternar Contato Principal
+                document.querySelectorAll('.chk-toggle-main').forEach(chk => {
+                    chk.addEventListener('change', function() {
+                        const id = this.getAttribute('data-id');
+                        
+                        fetch(`/provider-contacts/${id}/toggle-main`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(res => {
+                            if (res.status === 'success') {
+                                toastr.success(res.message);
+                            } else {
+                                toastr.error(res.message);
+                            }
+                            loadContacts(currentProviderId);
+                        })
+                        .catch(err => {
+                            toastr.error('Erro ao processar solicitação.');
+                            console.error(err);
+                            loadContacts(currentProviderId);
+                        });
+                    });
+                });
+
+                // Editar Contato
+                document.querySelectorAll('.btn-edit-contact-ajax').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const contact = JSON.parse(this.getAttribute('data-contact'));
+                        
+                        contactIdInput.value = contact.id;
+                        contactNameInput.value = contact.name;
+                        contactPhoneInput.value = contact.phone || '';
+                        contactEmailInput.value = contact.email || '';
+                        contactIsMainCheckbox.checked = contact.is_main;
+                        
+                        contactFormTitle.innerHTML = '<i class="fa-solid fa-user-pen me-1 text-primary"></i> Editar Contato';
+                        btnCancelEdit.classList.remove('d-none');
+                        btnSubmitContact.innerHTML = '<i class="fa-solid fa-save me-1"></i> Atualizar Contato';
+                        
+                        contactNameInput.focus();
+                    });
+                });
+
+                // Excluir Contato
+                document.querySelectorAll('.btn-delete-contact-ajax').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        
+                        Swal.fire({
+                            title: 'Remover contato?',
+                            text: "Esta ação não poderá ser desfeita.",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Sim, excluir!',
+                            cancelButtonText: 'Cancelar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/provider-contacts/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(res => {
+                                    if (res.status === 'success') {
+                                        toastr.success(res.message);
+                                        loadContacts(currentProviderId);
+                                    } else {
+                                        toastr.error(res.message);
+                                    }
+                                })
+                                .catch(err => {
+                                    toastr.error('Erro ao processar remoção.');
+                                    console.error(err);
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+
+            // Enviar Formulário de Contato (Novo ou Edição)
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const id = contactIdInput.value;
+                const name = contactNameInput.value;
+                const phone = contactPhoneInput.value;
+                const email = contactEmailInput.value;
+                const is_main = contactIsMainCheckbox.checked ? 1 : 0;
+                
+                const url = id ? `/provider-contacts/${id}` : `/providers/${currentProviderId}/contacts`;
+                const method = id ? 'PUT' : 'POST';
+                
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ name, phone, email, is_main })
+                })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        toastr.success(res.message);
+                        resetContactForm();
+                        loadContacts(currentProviderId);
+                    } else {
+                        toastr.error(res.message);
+                    }
+                })
+                .catch(err => {
+                    toastr.error('Erro ao salvar contato.');
+                    console.error(err);
+                });
+            });
         });
     </script>
 @endpush

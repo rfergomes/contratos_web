@@ -25,14 +25,22 @@ class ContractRequest extends Model
         'type',
         'title',
         'description',
+        'file_path',
+        'original_name',
         'status',
         'response_text',
+        'response_file_path',
+        'response_original_name',
+        'due_date',
+        'requires_attachment',
         'responded_by',
         'responded_at',
     ];
 
     protected $casts = [
         'responded_at' => 'datetime',
+        'due_date' => 'date',
+        'requires_attachment' => 'boolean',
     ];
 
     /**

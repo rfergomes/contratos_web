@@ -158,6 +158,12 @@
                                         <p>Empresas Contratantes</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('document-types.index') }}" class="nav-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}">
+                                        <i class="nav-icon fa-solid fa-folder-open"></i>
+                                        <p>Tipos de Documentos</p>
+                                    </a>
+                                </li>
                             @endif
 
                             <li class="nav-item">

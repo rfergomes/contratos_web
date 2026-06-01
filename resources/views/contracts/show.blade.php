@@ -323,17 +323,46 @@
                                             </h2>
                                             <div id="collapseRec{{ $req->id }}" class="accordion-collapse collapse" aria-labelledby="headingRec{{ $req->id }}" data-bs-parent="#accordionReceived">
                                                 <div class="accordion-body bg-light fs-7 p-3">
+                                                    @if($req->due_date)
+                                                        @php
+                                                            $isExpired = $req->status === 'pending' && $req->due_date->isPast();
+                                                        @endphp
+                                                        <span class="badge @if($isExpired) bg-danger @else bg-info @endif mb-2">
+                                                            <i class="fa-solid fa-calendar-day me-1"></i> Prazo: {{ $req->due_date->format('d/m/Y') }} @if($isExpired) (Atrasado) @endif
+                                                        </span>
+                                                    @endif
+                                                    @if($req->requires_attachment)
+                                                        <span class="badge bg-warning text-dark mb-2">
+                                                            <i class="fa-solid fa-paperclip me-1"></i> Exige anexo de retorno
+                                                        </span>
+                                                    @endif
+
                                                     <p class="mb-2"><strong>Descrição:</strong><br>{{ $req->description }}</p>
+
+                                                    @if($req->file_path)
+                                                        <div class="mb-2">
+                                                            <a href="{{ route('contracts.requests.download', [$req, 'sender']) }}" class="btn btn-xs btn-outline-primary py-1 px-2.5 fs-8">
+                                                                <i class="fa-solid fa-download me-1"></i> Baixar Anexo da Solicitação ({{ $req->original_name }})
+                                                            </a>
+                                                        </div>
+                                                    @endif
+
                                                     <p class="mb-1 text-muted fs-8">Enviada por: {{ $req->user->name }} ({{ $req->sender_type === 'company' ? 'Empresa Contratante' : 'Fornecedor' }})</p>
                                                     
                                                     @if($req->status === 'pending')
                                                         <!-- Formulário de Resposta -->
                                                         <hr class="my-2">
-                                                        <form action="{{ route('contracts.requests.respond', $req) }}" method="POST">
+                                                        <form action="{{ route('contracts.requests.respond', $req) }}" method="POST" enctype="multipart/form-data">
                                                             @csrf
                                                             <div class="mb-2">
                                                                 <label for="response_text_{{ $req->id }}" class="form-label fw-bold mb-1">Escrever Resposta / Parecer:</label>
                                                                 <textarea name="response_text" id="response_text_{{ $req->id }}" rows="3" class="form-control form-control-sm" placeholder="Responda de forma objetiva ou justifique a rejeição..." required></textarea>
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label for="response_file_{{ $req->id }}" class="form-label fw-bold mb-1">
+                                                                    Anexar Documento de Resposta @if($req->requires_attachment) <span class="text-danger">* (Obrigatório)</span> @else (Opcional) @endif:
+                                                                </label>
+                                                                <input type="file" name="response_file" id="response_file_{{ $req->id }}" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" @if($req->requires_attachment) required @endif>
                                                             </div>
                                                             <div class="d-flex gap-2">
                                                                 <button type="submit" name="status" value="resolved" class="btn btn-sm btn-success py-1 px-3">
@@ -349,6 +378,15 @@
                                                         <div class="bg-white p-2 border rounded">
                                                             <span class="badge @if($req->status === 'resolved') bg-success-subtle text-success @else bg-danger-subtle text-danger @endif text-uppercase fs-9 mb-1 d-inline-block">Parecer</span>
                                                             <p class="mb-1 text-dark"><strong>Resposta:</strong> {{ $req->response_text }}</p>
+                                                            
+                                                            @if($req->response_file_path)
+                                                                <div class="mt-2 mb-1">
+                                                                    <a href="{{ route('contracts.requests.download', [$req, 'responder']) }}" class="btn btn-xs btn-outline-success py-1 px-2.5 fs-8">
+                                                                        <i class="fa-solid fa-download me-1"></i> Baixar Anexo de Resposta ({{ $req->response_original_name }})
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                            
                                                             <small class="text-muted fs-8 d-block">Respondido por: {{ $req->responder->name ?? 'N/A' }} em {{ $req->responded_at->format('d/m/Y H:i') }}</small>
                                                         </div>
                                                     @endif
@@ -396,7 +434,30 @@
                                             </h2>
                                             <div id="collapseSent{{ $req->id }}" class="accordion-collapse collapse" aria-labelledby="headingSent{{ $req->id }}" data-bs-parent="#accordionSent">
                                                 <div class="accordion-body bg-light fs-7 p-3">
+                                                    @if($req->due_date)
+                                                        @php
+                                                            $isExpired = $req->status === 'pending' && $req->due_date->isPast();
+                                                        @endphp
+                                                        <span class="badge @if($isExpired) bg-danger @else bg-info @endif mb-2">
+                                                            <i class="fa-solid fa-calendar-day me-1"></i> Prazo: {{ $req->due_date->format('d/m/Y') }} @if($isExpired) (Atrasado) @endif
+                                                        </span>
+                                                    @endif
+                                                    @if($req->requires_attachment)
+                                                        <span class="badge bg-warning text-dark mb-2">
+                                                            <i class="fa-solid fa-paperclip me-1"></i> Exige anexo de retorno
+                                                        </span>
+                                                    @endif
+
                                                     <p class="mb-2"><strong>Descrição:</strong><br>{{ $req->description }}</p>
+
+                                                    @if($req->file_path)
+                                                        <div class="mb-2">
+                                                            <a href="{{ route('contracts.requests.download', [$req, 'sender']) }}" class="btn btn-xs btn-outline-primary py-1 px-2.5 fs-8">
+                                                                <i class="fa-solid fa-download me-1"></i> Baixar Anexo da Solicitação ({{ $req->original_name }})
+                                                            </a>
+                                                        </div>
+                                                    @endif
+
                                                     <span class="text-muted fs-8 d-block">Tipo: 
                                                         @switch($req->type)
                                                             @case('clarification') Esclarecimento @break
@@ -412,6 +473,15 @@
                                                         <div class="bg-white p-2 border rounded">
                                                             <span class="badge @if($req->status === 'resolved') bg-success-subtle text-success @else bg-danger-subtle text-danger @endif text-uppercase fs-9 mb-1 d-inline-block">Parecer</span>
                                                             <p class="mb-1 text-dark"><strong>Resposta:</strong> {{ $req->response_text }}</p>
+                                                            
+                                                            @if($req->response_file_path)
+                                                                <div class="mt-2 mb-1">
+                                                                    <a href="{{ route('contracts.requests.download', [$req, 'responder']) }}" class="btn btn-xs btn-outline-success py-1 px-2.5 fs-8">
+                                                                        <i class="fa-solid fa-download me-1"></i> Baixar Anexo de Resposta ({{ $req->response_original_name }})
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                            
                                                             <small class="text-muted fs-8 d-block">Respondido por: {{ $req->responder->name ?? 'N/A' }} em {{ $req->responded_at->format('d/m/Y H:i') }}</small>
                                                         </div>
                                                     @endif
@@ -430,11 +500,16 @@
         <!-- 5. GED Integrado (Documentos e Compliance) -->
         <div class="col-lg-6 col-12 mb-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-secondary">
                         <i class="fa-solid fa-folder-open me-2 text-primary"></i> 
                         Obrigações Documentais (GED)
                     </h6>
+                    @if(!auth()->user()->isFornecedor())
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addObligationModal">
+                            <i class="fa-solid fa-plus me-1"></i> Nova Obrigação
+                        </button>
+                    @endif
                 </div>
                 <div class="card-body p-0">
                     @if($contract->documents->isEmpty())
@@ -541,7 +616,7 @@
     <div class="modal fade" id="createRequestModal" tabindex="-1" aria-labelledby="createRequestModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="{{ route('contracts.requests.store', $contract) }}" method="POST">
+                <form action="{{ route('contracts.requests.store', $contract) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="createRequestModalLabel">Nova Solicitação / Chamado</h5>
@@ -567,7 +642,22 @@
                         <!-- Descrição -->
                         <div class="mb-3">
                             <label for="description" class="form-label fw-bold">Descrição da Demanda:</label>
-                            <textarea name="description" id="description" rows="5" class="form-control" placeholder="Escreva os detalhes, prazos e justificativas de forma detalhada..." required></textarea>
+                            <textarea name="description" id="description" rows="4" class="form-control" placeholder="Escreva os detalhes, dúvidas ou justificativas..." required></textarea>
+                        </div>
+                        <!-- Prazo Limite -->
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label fw-bold">Prazo Limite para Resposta (Opcional):</label>
+                            <input type="date" name="due_date" id="due_date" class="form-control" min="{{ date('Y-m-d') }}">
+                        </div>
+                        <!-- Anexo -->
+                        <div class="mb-3">
+                            <label for="file" class="form-label fw-bold">Anexar Documento (Opcional - PDF/Imagem):</label>
+                            <input type="file" name="file" id="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                        </div>
+                        <!-- Exigir Anexo de Retorno -->
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="requires_attachment" id="requires_attachment" class="form-check-input" value="1">
+                            <label for="requires_attachment" class="form-check-label fw-bold">Exigir anexo na resposta da outra parte</label>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -578,6 +668,45 @@
             </div>
         </div>
     </div>
+
+    <!-- 4. Modal: Adicionar Obrigação Documental (Gestor) -->
+    @if(!auth()->user()->isFornecedor())
+        <div class="modal fade" id="addObligationModal" tabindex="-1" aria-labelledby="addObligationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="{{ route('contracts.documents.store', $contract) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addObligationModalLabel">Nova Exigência Documental</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="fs-7 text-muted">Defina uma nova obrigação de envio para este contrato.</p>
+                            <!-- Tipo de Documento -->
+                            <div class="mb-3">
+                                <label for="document_type_id" class="form-label fw-bold">Tipo de Documento:</label>
+                                <select name="document_type_id" id="document_type_id" class="form-select" required>
+                                    <option value="" disabled selected>Selecione o tipo de documento...</option>
+                                    @foreach($documentTypes as $type)
+                                        <option value="{{ $type->id }}">{{ $type->name }} ({{ $type->periodicity == 'once' ? 'Único' : 'Periódico' }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <!-- Prazo -->
+                            <div class="mb-3">
+                                <label for="due_date_obligation" class="form-label fw-bold">Data Limite de Vencimento:</label>
+                                <input type="date" name="due_date" id="due_date_obligation" class="form-control" min="{{ date('Y-m-d') }}" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-1"></i> Exigir Documento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 
     @if(auth()->user()->isFornecedor())
         <!-- 2. Modal: Upload de Documento -->

@@ -12,6 +12,8 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContractRequestController;
+use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\ProviderContactController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -69,11 +71,22 @@ Route::middleware(['auth'])->group(function () {
     // Rotas de Fornecedores
     Route::resource('providers', ProviderController::class)->except(['destroy', 'create', 'edit']);
     Route::patch('/providers/{provider}/toggle', [ProviderController::class, 'toggle'])->name('providers.toggle');
+    Route::get('/providers/{provider}/contacts', [ProviderContactController::class, 'index'])->name('providers.contacts.index');
+    Route::post('/providers/{provider}/contacts', [ProviderContactController::class, 'store'])->name('providers.contacts.store');
+    Route::put('/provider-contacts/{contact}', [ProviderContactController::class, 'update'])->name('providers.contacts.update');
+    Route::delete('/provider-contacts/{contact}', [ProviderContactController::class, 'destroy'])->name('providers.contacts.destroy');
+    Route::patch('/provider-contacts/{contact}/toggle-main', [ProviderContactController::class, 'toggleMain'])->name('providers.contacts.toggle-main');
 
     // Rotas de Contratos
     Route::resource('contracts', ContractController::class)->except(['destroy', 'create', 'edit']);
+    Route::post('/contracts/{contract}/documents', [ContractController::class, 'addObligation'])->name('contracts.documents.store');
     Route::post('/contracts/{contract}/requests', [ContractRequestController::class, 'store'])->name('contracts.requests.store');
     Route::post('/contracts/requests/{contractRequest}/respond', [ContractRequestController::class, 'respond'])->name('contracts.requests.respond');
+    Route::get('/contracts/requests/{contractRequest}/download/{side}', [ContractRequestController::class, 'downloadAttachment'])->name('contracts.requests.download');
+
+    // Rotas de Tipos de Documentos (Obrigações Gerais)
+    Route::resource('document-types', DocumentTypeController::class)->except(['destroy', 'create', 'edit']);
+    Route::patch('/document-types/{documentType}/toggle', [DocumentTypeController::class, 'toggle'])->name('document-types.toggle');
 
     // Rotas de Usuários
     Route::resource('users', UserController::class)->except(['destroy', 'create', 'edit']);

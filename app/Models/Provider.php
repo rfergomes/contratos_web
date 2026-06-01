@@ -37,4 +37,12 @@ class Provider extends Model
     {
         return $this->hasMany(Contract::class);
     }
+
+    /**
+     * Relacionamento com Contatos de Fornecedores
+     */
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(ProviderContact::class);
+    }
 }
