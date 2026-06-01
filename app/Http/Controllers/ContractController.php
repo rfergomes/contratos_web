@@ -99,6 +99,9 @@ class ContractController extends Controller
             }
         }
 
+        // Registrar no histórico do contrato
+        \App\Models\ContractHistory::log($contract->id, 'created', 'Contrato Criado', 'O contrato foi cadastrado no sistema por ' . auth()->user()->name);
+
         return redirect()->route('contracts.index')->with('success', 'Contrato cadastrado com sucesso e obrigações documentais geradas!');
     }
 
@@ -129,6 +132,8 @@ class ContractController extends Controller
             'status' => 'required|in:active,expired,suspended,draft',
         ]);
 
+        $oldStatus = $contract->status;
+
         $contract->update([
             'company_id' => $request->company_id,
             'provider_id' => $request->provider_id,
@@ -142,6 +147,48 @@ class ContractController extends Controller
             'status' => $request->status,
         ]);
 
+        // Registrar no histórico do contrato
+        if ($oldStatus !== $contract->status) {
+            \App\Models\ContractHistory::log($contract->id, 'status_changed', 'Status Alterado', 'O status do contrato foi alterado de ' . $oldStatus . ' para ' . $contract->status . ' por ' . auth()->user()->name);
+        } else {
+            \App\Models\ContractHistory::log($contract->id, 'updated', 'Contrato Atualizado', 'As informações do contrato foram atualizadas por ' . auth()->user()->name);
+        }
+
         return redirect()->route('contracts.index')->with('success', 'Contrato atualizado com sucesso!');
+    }
+
+    /**
+     * Exibe o detalhe de um contrato (Histórico, Linha do Tempo e Solicitações).
+     */
+    public function show(Contract $contract)
+    {
+        $user = auth()->user();
+
+        // Validação adicional de ACL por segurança
+        if ($user->isFornecedor()) {
+            abort_if($contract->provider_id !== $user->provider_id, 403, 'Acesso não autorizado.');
+        } elseif ($user->isGestor()) {
+            abort_if($contract->company_id !== $user->company_id, 403, 'Acesso não autorizado.');
+        }
+
+        // Carregar relacionamentos necessários
+        $contract->load([
+            'company',
+            'provider',
+            'responsible',
+            'documents.documentType',
+            'documents.reviewer',
+            'requests' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'requests.user',
+            'requests.responder',
+            'histories' => function ($query) {
+                $query->orderBy('created_at', 'asc');
+            },
+            'histories.user',
+        ]);
+
+        return view('contracts.show', compact('contract'));
     }
 }

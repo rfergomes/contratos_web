@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class ContractRequest extends Model
+{
+    use HasFactory;
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new \App\Models\Scopes\DocumentScope);
+    }
+
+    protected $fillable = [
+        'contract_id',
+        'sender_type',
+        'user_id',
+        'type',
+        'title',
+        'description',
+        'status',
+        'response_text',
+        'responded_by',
+        'responded_at',
+    ];
+
+    protected $casts = [
+        'responded_at' => 'datetime',
+    ];
+
+    /**
+     * Relacionamento com o Contrato
+     */
+    public function contract(): BelongsTo
+    {
+        return $this->belongsTo(Contract::class);
+    }
+
+    /**
+     * Relacionamento com o usuário remetente da solicitação
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relacionamento com o usuário que respondeu à solicitação
+     */
+    public function responder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responded_by');
+    }
+}

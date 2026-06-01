@@ -10,15 +10,17 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm mb-4">
-                <div class="card-header border-0 bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-secondary">
-                        <i class="fa-solid fa-building me-2 text-primary"></i>
-                        Lista de Empresas
-                    </h5>
-                    <!-- Botão que abre o modal de criação -->
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
-                        <i class="fa-solid fa-plus me-1"></i> Nova Empresa
-                    </button>
+                <div class="card-header border-0 bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="fa-solid fa-building me-2 text-primary"></i>
+                            Lista de Empresas
+                        </h5>
+                        <!-- Botão que abre o modal de criação -->
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
+                            <i class="fa-solid fa-plus me-1"></i> Nova Empresa
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     @if($companies->isEmpty())

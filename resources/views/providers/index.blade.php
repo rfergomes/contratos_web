@@ -10,16 +10,18 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm mb-4">
-                <div class="card-header border-0 bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-secondary">
-                        <i class="fa-solid fa-truck me-2 text-primary"></i>
-                        Lista de Fornecedores
-                    </h5>
-                    @if(!auth()->user()->isFornecedor())
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createProviderModal">
-                            <i class="fa-solid fa-plus me-1"></i> Novo Fornecedor
-                        </button>
-                    @endif
+                <div class="card-header border-0 bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="fa-solid fa-truck me-2 text-primary"></i>
+                            Lista de Fornecedores
+                        </h5>
+                        @if(!auth()->user()->isFornecedor())
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createProviderModal">
+                                <i class="fa-solid fa-plus me-1"></i> Novo Fornecedor
+                            </button>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     @if($providers->isEmpty())

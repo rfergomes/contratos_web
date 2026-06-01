@@ -70,6 +70,9 @@ class GedController extends Controller
                 'approved_at' => null,
             ]);
 
+            // Registrar histórico do contrato
+            \App\Models\ContractHistory::log($document->contract_id, 'document_submitted', 'Documento Enviado', 'O documento "' . $document->documentType->name . '" foi enviado por ' . $user->name);
+
             return back()->with('success', 'Documento enviado com sucesso! Aguarde a análise do gestor.');
         }
 
@@ -127,6 +130,9 @@ class GedController extends Controller
             'rejection_reason' => null,
         ]);
 
+        // Registrar histórico do contrato
+        \App\Models\ContractHistory::log($document->contract_id, 'document_approved', 'Documento Aprovado', 'O documento "' . $document->documentType->name . '" foi aprovado por ' . $user->name);
+
         return back()->with('success', 'Documento aprovado com sucesso!');
     }
 
@@ -156,6 +162,9 @@ class GedController extends Controller
             'reviewed_by' => $user->id,
             'approved_at' => null,
         ]);
+
+        // Registrar histórico do contrato
+        \App\Models\ContractHistory::log($document->contract_id, 'document_rejected', 'Documento Recusado', 'O documento "' . $document->documentType->name . '" foi recusado por ' . $user->name . '. Motivo: ' . $request->rejection_reason);
 
         return back()->with('warning', 'Documento recusado. O fornecedor foi notificado sobre a pendência.');
     }

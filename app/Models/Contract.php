@@ -68,4 +68,20 @@ class Contract extends Model
     {
         return $this->hasMany(ContractDocument::class);
     }
+
+    /**
+     * Relacionamento com as Solicitações Bi-direcionais
+     */
+    public function requests(): HasMany
+    {
+        return $this->hasMany(ContractRequest::class);
+    }
+
+    /**
+     * Relacionamento com o Histórico / Linha do Tempo
+     */
+    public function histories(): HasMany
+    {
+        return $this->hasMany(ContractHistory::class)->orderBy('created_at', 'asc');
+    }
 }

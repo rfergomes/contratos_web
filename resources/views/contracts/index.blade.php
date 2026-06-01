@@ -10,16 +10,18 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm mb-4">
-                <div class="card-header border-0 bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-secondary">
-                        <i class="fa-solid fa-file-contract me-2 text-primary"></i>
-                        Lista de Contratos
-                    </h5>
-                    @if(!auth()->user()->isFornecedor())
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
-                            <i class="fa-solid fa-plus me-1"></i> Novo Contrato
-                        </button>
-                    @endif
+                <div class="card-header border-0 bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="fa-solid fa-file-contract me-2 text-primary"></i>
+                            Lista de Contratos
+                        </h5>
+                        @if(!auth()->user()->isFornecedor())
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
+                                <i class="fa-solid fa-plus me-1"></i> Novo Contrato
+                            </button>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     @if($contracts->isEmpty())
@@ -40,9 +42,7 @@
                                         <th>Fornecedor</th>
                                         <th>Vigência (Início - Fim)</th>
                                         <th class="text-center">Status</th>
-                                        @if(!auth()->user()->isFornecedor())
-                                            <th class="text-end px-4" style="width: 150px;">Ações</th>
-                                        @endif
+                                        <th class="text-end px-4" style="width: 200px;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -83,25 +83,30 @@
                                                         @break
                                                 @endswitch
                                             </td>
-                                            @if(!auth()->user()->isFornecedor())
-                                                <td class="text-end px-4">
-                                                    <button type="button" class="btn btn-sm btn-primary btn-edit-contract"
-                                                            data-id="{{ $contract->id }}"
-                                                            data-company-id="{{ $contract->company_id }}"
-                                                            data-provider-id="{{ $contract->provider_id }}"
-                                                            data-responsible-id="{{ $contract->responsible_id }}"
-                                                            data-contract-number="{{ $contract->contract_number }}"
-                                                            data-title="{{ $contract->title }}"
-                                                            data-description="{{ $contract->description }}"
-                                                            data-start-date="{{ $contract->start_date->format('Y-m-d') }}"
-                                                            data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
-                                                            data-alert-days="{{ $contract->alert_days }}"
-                                                            data-status="{{ $contract->status }}"
-                                                            data-url="{{ route('contracts.update', $contract) }}">
-                                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                                    </button>
-                                                </td>
-                                            @endif
+                                            <td class="text-end px-4">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <a href="{{ route('contracts.show', $contract) }}" class="btn btn-sm btn-outline-info" title="Visualizar Linha do Tempo e Solicitações">
+                                                        <i class="fa-solid fa-eye"></i> Detalhes
+                                                    </a>
+                                                    @if(!auth()->user()->isFornecedor())
+                                                        <button type="button" class="btn btn-sm btn-primary btn-edit-contract"
+                                                                data-id="{{ $contract->id }}"
+                                                                data-company-id="{{ $contract->company_id }}"
+                                                                data-provider-id="{{ $contract->provider_id }}"
+                                                                data-responsible-id="{{ $contract->responsible_id }}"
+                                                                data-contract-number="{{ $contract->contract_number }}"
+                                                                data-title="{{ $contract->title }}"
+                                                                data-description="{{ $contract->description }}"
+                                                                data-start-date="{{ $contract->start_date->format('Y-m-d') }}"
+                                                                data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
+                                                                data-alert-days="{{ $contract->alert_days }}"
+                                                                data-status="{{ $contract->status }}"
+                                                                data-url="{{ route('contracts.update', $contract) }}">
+                                                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

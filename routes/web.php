@@ -11,6 +11,7 @@ use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ContractRequestController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -71,6 +72,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Rotas de Contratos
     Route::resource('contracts', ContractController::class)->except(['destroy', 'create', 'edit']);
+    Route::post('/contracts/{contract}/requests', [ContractRequestController::class, 'store'])->name('contracts.requests.store');
+    Route::post('/contracts/requests/{contractRequest}/respond', [ContractRequestController::class, 'respond'])->name('contracts.requests.respond');
 
     // Rotas de Usuários
     Route::resource('users', UserController::class)->except(['destroy', 'create', 'edit']);
