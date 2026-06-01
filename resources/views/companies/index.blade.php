@@ -16,10 +16,17 @@
                             <i class="fa-solid fa-building me-2 text-primary"></i>
                             Lista de Empresas
                         </h5>
-                        <!-- Botão que abre o modal de criação -->
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
-                            <i class="fa-solid fa-plus me-1"></i> Nova Empresa
-                        </button>
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Switch Tabela / Cards -->
+                            <div class="form-check form-switch mb-0 d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" role="switch" id="viewModeSwitch" style="cursor: pointer;">
+                                <label class="form-check-label fw-bold text-muted fs-8 mb-0" for="viewModeSwitch" id="viewModeLabel" style="cursor: pointer; user-select: none;">Tabela</label>
+                            </div>
+                            <!-- Botão Nova Empresa -->
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
+                                <i class="fa-solid fa-plus me-1"></i> Nova Empresa
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -29,15 +36,16 @@
                             <p class="text-muted mb-0">Nenhuma empresa contratante cadastrada no sistema.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
+                        <!-- MODO TABELA -->
+                        <div id="view-table-container" class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width: 80px;">ID</th>
                                         <th>Nome da Empresa</th>
                                         <th>CNPJ</th>
-                                        <th class="text-center">Status</th>
-                                        <th class="text-end px-4" style="width: 200px;">Ações</th>
+                                        <th class="text-center" style="width: 150px;">Status</th>
+                                        <th class="text-end px-4" style="width: 150px;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -47,38 +55,73 @@
                                             <td><strong>{{ $company->name }}</strong></td>
                                             <td>{{ $company->cnpj }}</td>
                                             <td class="text-center">
-                                                @if($company->active)
-                                                    <span class="badge bg-success">Ativa</span>
-                                                @else
-                                                    <span class="badge bg-secondary">Inativa</span>
-                                                @endif
+                                                <form action="{{ route('companies.toggle', $company) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <div class="form-check form-switch d-inline-block align-middle">
+                                                        <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $company->active ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-bold text-secondary fs-7 ms-1">{{ $company->active ? 'Ativa' : 'Inativa' }}</label>
+                                                    </div>
+                                                </form>
                                             </td>
                                             <td class="text-end px-4">
-                                                <div class="d-flex justify-content-end gap-2">
-                                                    <!-- Toggle Status -->
-                                                    <form action="{{ route('companies.toggle', $company) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Alternar Ativo/Inativo">
-                                                            <i class="fa-solid fa-power-off"></i>
-                                                        </button>
-                                                    </form>
-
-                                                    <!-- Edit Button (Abre o modal via JS populando os dados) -->
-                                                    <button type="button" class="btn btn-sm btn-primary btn-edit-company" 
-                                                            data-id="{{ $company->id }}"
-                                                            data-name="{{ $company->name }}"
-                                                            data-cnpj="{{ $company->cnpj }}"
-                                                            data-active="{{ $company->active ? '1' : '0' }}"
-                                                            data-url="{{ route('companies.update', $company) }}">
-                                                        <i class="fa-solid fa-pen-to-square"></i> Editar
-                                                    </button>
-                                                </div>
+                                                <button type="button" class="btn btn-sm btn-primary btn-edit-company" 
+                                                        data-id="{{ $company->id }}"
+                                                        data-name="{{ $company->name }}"
+                                                        data-cnpj="{{ $company->cnpj }}"
+                                                        data-active="{{ $company->active ? '1' : '0' }}"
+                                                        data-url="{{ route('companies.update', $company) }}">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                </button>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- MODO CARDS -->
+                        <div id="view-card-container" class="p-4 d-none">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                                @foreach($companies as $company)
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border border-light">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="bg-primary-subtle text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="fa-solid fa-building fs-5"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-0 text-dark">{{ $company->name }}</h6>
+                                                        <small class="text-muted">ID: {{ $company->id }}</small>
+                                                    </div>
+                                                </div>
+                                                <p class="mb-3 fs-7 text-secondary">
+                                                    <strong>CNPJ:</strong> {{ $company->cnpj }}
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                                    <form action="{{ route('companies.toggle', $company) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <div class="form-check form-switch align-middle mb-0">
+                                                            <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $company->active ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold text-secondary fs-8 ms-1">{{ $company->active ? 'Ativa' : 'Inativa' }}</label>
+                                                        </div>
+                                                    </form>
+                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-company"
+                                                            data-id="{{ $company->id }}"
+                                                            data-name="{{ $company->name }}"
+                                                            data-cnpj="{{ $company->cnpj }}"
+                                                            data-active="{{ $company->active ? '1' : '0' }}"
+                                                            data-url="{{ route('companies.update', $company) }}">
+                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -227,6 +270,38 @@
                     createModal.show();
                 @endif
             @endif
+
+            // View Mode Toggle
+            const toggleSwitch = document.getElementById('viewModeSwitch');
+            const tableContainer = document.getElementById('view-table-container');
+            const cardContainer = document.getElementById('view-card-container');
+            const modeLabel = document.getElementById('viewModeLabel');
+            
+            if (toggleSwitch && tableContainer && cardContainer) {
+                const savedMode = localStorage.getItem('view_mode_companies') || 'table';
+                
+                const setMode = (mode) => {
+                    if (mode === 'card') {
+                        tableContainer.classList.add('d-none');
+                        cardContainer.classList.remove('d-none');
+                        toggleSwitch.checked = true;
+                        if (modeLabel) modeLabel.textContent = 'Cards';
+                    } else {
+                        tableContainer.classList.remove('d-none');
+                        cardContainer.classList.add('d-none');
+                        toggleSwitch.checked = false;
+                        if (modeLabel) modeLabel.textContent = 'Tabela';
+                    }
+                    localStorage.setItem('view_mode_companies', mode);
+                };
+                
+                setMode(savedMode);
+                
+                toggleSwitch.addEventListener('change', function() {
+                    setMode(this.checked ? 'card' : 'table');
+                });
+            }
         });
     </script>
 @endpush
+

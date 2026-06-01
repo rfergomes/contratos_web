@@ -16,6 +16,10 @@ class ContractRequest extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new \App\Models\Scopes\DocumentScope);
+
+        static::created(function ($request) {
+            \App\Models\Alert::createForNewRequest($request);
+        });
     }
 
     protected $fillable = [

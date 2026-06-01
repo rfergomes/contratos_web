@@ -138,6 +138,8 @@ class ContractRequestController extends Controller
             'responded_at' => now(),
         ]);
 
+        \App\Models\Alert::createForRequestResponse($contractRequest);
+
         // Registrar no histórico do contrato
         $actionName = $request->status === 'resolved' ? 'Resolvida' : 'Recusada';
         $historyAction = $request->status === 'resolved' ? 'request_resolved' : 'request_rejected';

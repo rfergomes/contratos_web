@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ContractRequestController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ProviderContactController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -50,9 +51,11 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
 
 // Área Autenticada
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Dashboard e Alertas
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::patch('/alerts/{alert}/read', [DashboardController::class, 'markAsRead'])->name('alerts.read');
+    Route::post('/alerts/read-all', [DashboardController::class, 'markAllAsRead'])->name('alerts.read-all');
+    Route::get('/alerts/{alert}/go', [DashboardController::class, 'navigate'])->name('alerts.go');
 
     // Rotas de GED (Upload, Download, Aprovação/Recusa)
     Route::get('/ged', [GedController::class, 'index'])->name('ged.index');

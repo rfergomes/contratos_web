@@ -16,11 +16,18 @@
                             <i class="fa-solid fa-file-contract me-2 text-primary"></i>
                             Lista de Contratos
                         </h5>
-                        @if(!auth()->user()->isFornecedor())
-                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
-                                <i class="fa-solid fa-plus me-1"></i> Novo Contrato
-                            </button>
-                        @endif
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Switch Tabela / Cards -->
+                            <div class="form-check form-switch mb-0 d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" role="switch" id="viewModeSwitch" style="cursor: pointer;">
+                                <label class="form-check-label fw-bold text-muted fs-8 mb-0" for="viewModeSwitch" id="viewModeLabel" style="cursor: pointer; user-select: none;">Tabela</label>
+                            </div>
+                            @if(!auth()->user()->isFornecedor())
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
+                                    <i class="fa-solid fa-plus me-1"></i> Novo Contrato
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -30,7 +37,8 @@
                             <p class="text-muted mb-0">Nenhum contrato cadastrado ou ativo.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
+                        <!-- MODO TABELA -->
+                        <div id="view-table-container" class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -111,6 +119,89 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- MODO CARDS -->
+                        <div id="view-card-container" class="p-4 d-none">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                                @foreach($contracts as $contract)
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border border-light">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary-subtle text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                            <i class="fa-solid fa-file-contract fs-5"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0 text-dark">{{ $contract->title }}</h6>
+                                                            <small class="text-muted">Nº: {{ $contract->contract_number }}</small>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        @switch($contract->status)
+                                                            @case('active')
+                                                                <span class="badge bg-success">Ativo</span>
+                                                                @break
+                                                            @case('expired')
+                                                                <span class="badge bg-danger">Vencido</span>
+                                                                @break
+                                                            @case('suspended')
+                                                                <span class="badge bg-warning text-dark">Suspenso</span>
+                                                                @break
+                                                            @case('draft')
+                                                                <span class="badge bg-secondary">Rascunho</span>
+                                                                @break
+                                                        @endswitch
+                                                    </div>
+                                                </div>
+                                                
+                                                @if(auth()->user()->isSuperAdmin())
+                                                    <p class="mb-1 fs-8 text-secondary">
+                                                        <strong>Contratante:</strong> {{ $contract->company->name ?? 'N/A' }}
+                                                    </p>
+                                                @endif
+                                                <p class="mb-2 fs-7 text-secondary">
+                                                    <strong>Fornecedor:</strong> {{ $contract->provider->name ?? 'N/A' }}
+                                                </p>
+                                                <p class="mb-2 fs-8 text-muted">
+                                                    {{ Str::limit($contract->description, 100) }}
+                                                </p>
+                                                <p class="mb-2 fs-8 text-secondary">
+                                                    <strong>Vigência:</strong> {{ $contract->start_date->format('d/m/Y') }} a {{ $contract->end_date->format('d/m/Y') }}
+                                                </p>
+                                                <div class="mb-3 fs-8 text-muted border-top pt-2 mt-2">
+                                                    <span class="d-block"><i class="fa-solid fa-user me-1 text-primary"></i> Resp: {{ $contract->responsible->name ?? 'N/A' }}</span>
+                                                    <span class="d-block"><i class="fa-solid fa-bell me-1 text-warning"></i> Alerta de renovação: {{ $contract->alert_days }} dias</span>
+                                                </div>
+                                                
+                                                <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                                                    <a href="{{ route('contracts.show', $contract) }}" class="btn btn-xs btn-outline-info">
+                                                        <i class="fa-solid fa-eye me-1"></i> Detalhes
+                                                    </a>
+                                                    @if(!auth()->user()->isFornecedor())
+                                                        <button type="button" class="btn btn-xs btn-primary btn-edit-contract"
+                                                                data-id="{{ $contract->id }}"
+                                                                data-company-id="{{ $contract->company_id }}"
+                                                                data-provider-id="{{ $contract->provider_id }}"
+                                                                data-responsible-id="{{ $contract->responsible_id }}"
+                                                                data-contract-number="{{ $contract->contract_number }}"
+                                                                data-title="{{ $contract->title }}"
+                                                                data-description="{{ $contract->description }}"
+                                                                data-start-date="{{ $contract->start_date->format('Y-m-d') }}"
+                                                                data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
+                                                                data-alert-days="{{ $contract->alert_days }}"
+                                                                data-status="{{ $contract->status }}"
+                                                                data-url="{{ route('contracts.update', $contract) }}">
+                                                            <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -478,4 +569,38 @@
             });
         </script>
     @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleSwitch = document.getElementById('viewModeSwitch');
+            const tableContainer = document.getElementById('view-table-container');
+            const cardContainer = document.getElementById('view-card-container');
+            const modeLabel = document.getElementById('viewModeLabel');
+            
+            if (toggleSwitch && tableContainer && cardContainer) {
+                const savedMode = localStorage.getItem('view_mode_contracts') || 'table';
+                
+                const setMode = (mode) => {
+                    if (mode === 'card') {
+                        tableContainer.classList.add('d-none');
+                        cardContainer.classList.remove('d-none');
+                        toggleSwitch.checked = true;
+                        if (modeLabel) modeLabel.textContent = 'Cards';
+                    } else {
+                        tableContainer.classList.remove('d-none');
+                        cardContainer.classList.add('d-none');
+                        toggleSwitch.checked = false;
+                        if (modeLabel) modeLabel.textContent = 'Tabela';
+                    }
+                    localStorage.setItem('view_mode_contracts', mode);
+                };
+                
+                setMode(savedMode);
+                
+                toggleSwitch.addEventListener('change', function() {
+                    setMode(this.checked ? 'card' : 'table');
+                });
+            }
+        });
+    </script>
 @endpush

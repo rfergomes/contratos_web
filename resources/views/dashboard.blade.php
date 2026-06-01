@@ -27,14 +27,14 @@
         </div>
     </div>
 
-    <!-- Widgets Estatísticos Baseados no Perfil -->
+    <!-- Widgets Estatísticos Dinâmicos -->
     <div class="row">
         @if(auth()->user()->isSuperAdmin())
             <!-- Widgets para Super Admin -->
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-primary mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-primary mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>2</h3>
+                        <h3>{{ $stats['companies'] }}</h3>
                         <p>Empresas Contratantes</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -43,20 +43,20 @@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>2</h3>
+                        <h3>{{ $stats['providers'] }}</h3>
                         <p>Fornecedores Ativos</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-truck"></i>
+                        <i class="fa-solid fa-handshake"></i>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white">
+                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
                     <div class="inner">
-                        <h3>5</h3>
+                        <h3>{{ $stats['contracts'] }}</h3>
                         <p>Contratos Cadastrados</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -65,9 +65,9 @@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>10</h3>
+                        <h3>{{ $stats['documents'] }}</h3>
                         <p>Documentos Exigidos</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -78,9 +78,9 @@
         @elseif(auth()->user()->isGestor())
             <!-- Widgets para Gestor da Empresa -->
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-info mb-4 p-3 shadow-sm text-white">
+                <div class="small-box card text-bg-info mb-4 p-3 shadow-sm text-white border-0">
                     <div class="inner">
-                        <h3>3</h3>
+                        <h3>{{ $stats['active_contracts'] }}</h3>
                         <p>Contratos Ativos</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -89,9 +89,9 @@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white">
+                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
                     <div class="inner">
-                        <h3>4</h3>
+                        <h3>{{ $stats['submitted_documents'] }}</h3>
                         <p>Documentos em Análise</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -100,9 +100,9 @@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>2</h3>
+                        <h3>{{ $stats['pending_documents'] }}</h3>
                         <p>Documentos Pendentes</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -111,9 +111,9 @@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>12</h3>
+                        <h3>{{ $stats['approved_documents'] }}</h3>
                         <p>Documentos Aprovados</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -124,10 +124,10 @@
         @else
             <!-- Widgets para Fornecedor -->
             <div class="col-lg-4 col-12">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>3</h3>
-                        <p>Obrigações Documentais Pendentes</p>
+                        <h3>{{ $stats['pending_obligations'] }}</h3>
+                        <p>Obrigações Pendentes</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -135,9 +135,9 @@
                 </div>
             </div>
             <div class="col-lg-4 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white">
+                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
                     <div class="inner">
-                        <h3>1</h3>
+                        <h3>{{ $stats['submitted_documents'] }}</h3>
                         <p>Enviados em Análise</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -146,9 +146,9 @@
                 </div>
             </div>
             <div class="col-lg-4 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm">
+                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
                     <div class="inner">
-                        <h3>8</h3>
+                        <h3>{{ $stats['compliant_documents'] }}</h3>
                         <p>Documentos em Conformidade</p>
                     </div>
                     <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
@@ -161,8 +161,9 @@
 
     <!-- Visão Geral de Contratos / Pendências -->
     <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
+        <!-- Tabela de Contratos Recentes -->
+        <div class="col-lg-8 col-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-header border-0 bg-white py-3">
                     <div class="d-flex justify-content-between align-items-center w-100">
                         <h5 class="mb-0 text-secondary">
@@ -173,76 +174,267 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Nº Contrato</th>
-                                    <th>Objeto</th>
-                                    @if(!auth()->user()->isFornecedor())
-                                        <th>Fornecedor</th>
-                                    @endif
-                                    <th>Início</th>
-                                    <th>Término</th>
-                                    <th class="text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>CTR-2026-001</strong></td>
-                                    <td>Prestação de Serviços de Limpeza e Conservação</td>
-                                    @if(!auth()->user()->isFornecedor())
-                                        <td>Fornecedor Beta</td>
-                                    @endif
-                                    <td>01/01/2026</td>
-                                    <td>31/12/2026</td>
-                                    <td class="text-center"><span class="badge bg-success">Ativo</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>CTR-2026-002</strong></td>
-                                    <td>Segurança Patrimonial e Monitoramento de Câmeras</td>
-                                    @if(!auth()->user()->isFornecedor())
-                                        <td>Vigilância Gama</td>
-                                    @endif
-                                    <td>15/01/2026</td>
-                                    <td>14/01/2027</td>
-                                    <td class="text-center"><span class="badge bg-success">Ativo</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    @if($recentContracts->isEmpty())
+                        <div class="text-center p-5">
+                            <i class="fa-solid fa-file-signature fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Nenhum contrato ativo ou registrado.</p>
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nº Contrato</th>
+                                        <th>Objeto / Título</th>
+                                        @if(auth()->user()->isSuperAdmin())
+                                            <th>Empresa</th>
+                                        @endif
+                                        @if(!auth()->user()->isFornecedor())
+                                            <th>Fornecedor</th>
+                                        @endif
+                                        <th>Vigência</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentContracts as $contract)
+                                        <tr onclick="window.location='{{ route('contracts.show', $contract) }}'" style="cursor: pointer;">
+                                            <td><strong>{{ $contract->contract_number }}</strong></td>
+                                            <td>
+                                                <div class="fw-bold">{{ $contract->title }}</div>
+                                                <div class="text-muted fs-8">{{ Str::limit($contract->description, 60) }}</div>
+                                            </td>
+                                            @if(auth()->user()->isSuperAdmin())
+                                                <td>{{ $contract->company->name ?? 'N/A' }}</td>
+                                            @endif
+                                            @if(!auth()->user()->isFornecedor())
+                                                <td>{{ $contract->provider->name ?? 'N/A' }}</td>
+                                            @endif
+                                            <td class="fs-7">
+                                                {{ $contract->start_date->format('d/m/Y') }} a {{ $contract->end_date->format('d/m/Y') }}
+                                            </td>
+                                            <td class="text-center">
+                                                @switch($contract->status)
+                                                    @case('active')
+                                                        <span class="badge bg-success">Ativo</span>
+                                                        @break
+                                                    @case('expired')
+                                                        <span class="badge bg-danger">Vencido</span>
+                                                        @break
+                                                    @case('suspended')
+                                                        <span class="badge bg-warning text-dark">Suspenso</span>
+                                                        @break
+                                                    @case('draft')
+                                                        <span class="badge bg-secondary">Rascunho</span>
+                                                        @break
+                                                @endswitch
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <!-- Informativos / Prazos -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header border-0 bg-white py-3">
+        <!-- Painel de Gerenciamento de Alertas -->
+        <div class="col-lg-4 col-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header border-0 bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-secondary">
                         <i class="fa-solid fa-bell me-2 text-warning"></i>
-                        Alertas de Prazos
+                        Alertas e Notificações
                     </h5>
+                    @if($unreadAlerts->isNotEmpty())
+                        <button type="button" id="btn-read-all-alerts" class="btn btn-xs btn-outline-secondary">
+                            Ler Todos
+                        </button>
+                    @endif
                 </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-start px-0 border-bottom-0 pb-3">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold text-danger">Guia de FGTS (Vencimento)</div>
-                                <span class="text-muted fs-7">Obrigação mensal do Fornecedor Beta</span>
+                <div class="card-body p-0">
+                    <div id="alerts-list-container" class="list-group list-group-flush" style="max-height: 450px; overflow-y: auto;">
+                        @if($unreadAlerts->isEmpty())
+                            <div class="text-center p-5 text-muted" id="empty-alerts-state">
+                                <i class="fa-solid fa-circle-check text-success fa-3x mb-3"></i>
+                                <p class="mb-0 fw-bold">Tudo em ordem!</p>
+                                <p class="text-muted fs-8 mb-0">Você não possui alertas ou prazos pendentes.</p>
                             </div>
-                            <span class="badge bg-danger rounded-pill">Atrasado</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-start px-0 border-bottom-0 pb-3">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold text-warning">CND Trabalhista</div>
-                                <span class="text-muted fs-7">Vencimento em 15 dias para Vigilância Gama</span>
-                            </div>
-                            <span class="badge bg-warning text-dark rounded-pill">A vencer</span>
-                        </li>
-                    </ul>
+                        @else
+                            @foreach($unreadAlerts as $alert)
+                                @php
+                                    $alertIcons = [
+                                        'new_request' => 'fa-envelope text-primary bg-primary-subtle',
+                                        'request_deadline' => 'fa-clock text-warning bg-warning-subtle',
+                                        'obligation_deadline' => 'fa-circle-exclamation text-danger bg-danger-subtle',
+                                        'request_response' => 'fa-reply text-success bg-success-subtle',
+                                    ];
+                                    $alertIcon = $alertIcons[$alert->type] ?? 'fa-bell text-secondary bg-light';
+                                @endphp
+                                <div class="list-group-item d-flex align-items-start p-3 alert-item-row" id="alert-row-{{ $alert->id }}">
+                                    <!-- Icone -->
+                                    <div class="flex-shrink-0 rounded-circle p-2 d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fa-solid {{ $alertIcon }} fs-5"></i>
+                                    </div>
+                                    <!-- Conteudo -->
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                            <span class="fw-bold fs-7 text-dark text-truncate" style="max-width: 170px;">{{ $alert->title }}</span>
+                                            <span class="text-muted fs-8">{{ $alert->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="mb-2 text-secondary fs-8 text-wrap" style="line-height: 1.3;">{{ $alert->message }}</p>
+                                        
+                                        <!-- Ações do Alerta -->
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('alerts.go', $alert) }}" class="btn btn-xs btn-primary d-flex align-items-center gap-1">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Navegar
+                                            </a>
+                                            <button type="button" class="btn btn-xs btn-outline-secondary btn-read-alert" data-id="{{ $alert->id }}">
+                                                <i class="fa-solid fa-check"></i> Lido
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seletor dos botões de leitura de alertas individuais
+            document.querySelectorAll('.btn-read-alert').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const alertId = this.getAttribute('data-id');
+                    const alertRow = document.getElementById(`alert-row-${alertId}`);
+
+                    fetch(`/alerts/${alertId}/read`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            toastr.success(res.message);
+                            
+                            // Efeito suave de fadeOut e remoção
+                            alertRow.style.transition = 'all 0.4s ease';
+                            alertRow.style.opacity = '0';
+                            alertRow.style.height = '0';
+                            alertRow.style.padding = '0';
+                            
+                            setTimeout(() => {
+                                alertRow.remove();
+                                checkEmptyAlertState();
+                            }, 400);
+                        } else {
+                            toastr.error('Falha ao marcar alerta como lido.');
+                        }
+                    })
+                    .catch(err => {
+                        toastr.error('Erro de conexão ao processar leitura.');
+                        console.error(err);
+                    });
+                });
+            });
+
+            // Seletor para ler todos os alertas
+            const readAllBtn = document.getElementById('btn-read-all-alerts');
+            if (readAllBtn) {
+                readAllBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    fetch('/alerts/read-all', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            toastr.success(res.message);
+                            
+                            // Remove o botão de ler tudo
+                            readAllBtn.remove();
+                            
+                            // FadeOut de todas as linhas de alerta
+                            document.querySelectorAll('.alert-item-row').forEach(row => {
+                                row.style.transition = 'all 0.4s ease';
+                                row.style.opacity = '0';
+                                row.style.height = '0';
+                                row.style.padding = '0';
+                                setTimeout(() => row.remove(), 400);
+                            });
+                            
+                            setTimeout(() => {
+                                checkEmptyAlertState();
+                            }, 450);
+                        }
+                    })
+                    .catch(err => {
+                        toastr.error('Erro ao marcar todos como lidos.');
+                        console.error(err);
+                    });
+                });
+            }
+
+            // Função para verificar se a lista de alertas ficou vazia e injetar o empty state
+            function checkEmptyAlertState() {
+                const container = document.getElementById('alerts-list-container');
+                const rows = container.querySelectorAll('.alert-item-row');
+                
+                if (rows.length === 0) {
+                    // Remove botão no header caso exista
+                    const btnHeader = document.getElementById('btn-read-all-alerts');
+                    if (btnHeader) btnHeader.remove();
+
+                    // Injeta html do empty state
+                    container.innerHTML = `
+                        <div class="text-center p-5 text-muted" id="empty-alerts-state">
+                            <i class="fa-solid fa-circle-check text-success fa-3x mb-3"></i>
+                            <p class="mb-0 fw-bold">Tudo em ordem!</p>
+                            <p class="text-muted fs-8 mb-0">Você não possui alertas ou prazos pendentes.</p>
+                        </div>
+                    `;
+
+                    // Atualiza o contador de alertas no badge da Navbar (caso exista no header)
+                    const navBadge = document.querySelector('.navbar-nav .badge');
+                    if (navBadge) {
+                        navBadge.remove();
+                    }
+                    
+                    const navHeader = document.querySelector('.dropdown-menu .dropdown-header');
+                    if (navHeader) {
+                        navHeader.textContent = '0 Alertas Não Lidos';
+                    }
+
+                    const navMenu = document.querySelector('.dropdown-menu');
+                    if (navMenu) {
+                        navMenu.innerHTML = `
+                            <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
+                                0 Alertas Não Lidos
+                            </span>
+                            <div class="dropdown-divider mb-0"></div>
+                            <div class="dropdown-item text-center text-muted py-3">
+                                <i class="fa-solid fa-circle-check text-success mb-2 fs-4"></i>
+                                <p class="mb-0 fs-7">Nenhuma pendência encontrada</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
+        });
+    </script>
+@endpush

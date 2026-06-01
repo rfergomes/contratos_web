@@ -16,9 +16,16 @@
                             <i class="fa-solid fa-users me-2 text-primary"></i>
                             Lista de Usuários
                         </h5>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                            <i class="fa-solid fa-user-plus me-1"></i> Novo Usuário
-                        </button>
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Switch Tabela / Cards -->
+                            <div class="form-check form-switch mb-0 d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" role="switch" id="viewModeSwitch" style="cursor: pointer;">
+                                <label class="form-check-label fw-bold text-muted fs-8 mb-0" for="viewModeSwitch" id="viewModeLabel" style="cursor: pointer; user-select: none;">Tabela</label>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                                <i class="fa-solid fa-user-plus me-1"></i> Novo Usuário
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -28,7 +35,8 @@
                             <p class="text-muted mb-0">Nenhum usuário cadastrado no sistema.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
+                        <!-- MODO TABELA -->
+                        <div id="view-table-container" class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -81,25 +89,24 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                @if($user->active)
-                                                    <span class="badge bg-success">Ativo</span>
+                                                @if($user->id !== auth()->id())
+                                                    <form action="{{ route('users.toggle', $user) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <div class="form-check form-switch d-inline-block align-middle">
+                                                            <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $user->active ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold text-secondary fs-7 ms-1">{{ $user->active ? 'Ativo' : 'Inativo' }}</label>
+                                                        </div>
+                                                    </form>
                                                 @else
-                                                    <span class="badge bg-secondary">Inativo</span>
+                                                    <div class="form-check form-switch d-inline-block align-middle">
+                                                        <input class="form-check-input" type="checkbox" role="switch" checked disabled>
+                                                        <label class="form-check-label fw-bold text-secondary fs-7 ms-1">Ativo</label>
+                                                    </div>
                                                 @endif
                                             </td>
                                             <td class="text-end px-4">
                                                 <div class="d-flex justify-content-end gap-2">
-                                                    <!-- Toggle Status -->
-                                                    @if($user->id !== auth()->id())
-                                                        <form action="{{ route('users.toggle', $user) }}" method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="Alternar Ativo/Inativo">
-                                                                <i class="fa-solid fa-power-off"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-
                                                     <!-- Edit Button -->
                                                     <button type="button" class="btn btn-sm btn-primary btn-edit-user"
                                                             data-id="{{ $user->id }}"
@@ -118,6 +125,84 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- MODO CARDS -->
+                        <div id="view-card-container" class="p-4 d-none">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                                @foreach($users as $user)
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border border-light">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <img src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=mp&s=40' }}" 
+                                                         class="rounded-circle me-3" alt="Avatar" style="width: 48px; height: 48px; object-fit: cover;">
+                                                    <div>
+                                                        <h6 class="fw-bold mb-0 text-dark">{{ $user->name }}</h6>
+                                                        <small class="text-muted">ID: {{ $user->id }}</small>
+                                                    </div>
+                                                </div>
+                                                <p class="mb-2 fs-7 text-secondary">
+                                                    <strong>E-mail:</strong> {{ $user->email }}
+                                                </p>
+                                                <div class="mb-2 fs-7">
+                                                    <strong>Perfil:</strong>
+                                                    @switch($user->role)
+                                                        @case('super_admin')
+                                                            <span class="badge bg-danger text-white">Administrador Global</span>
+                                                            @break
+                                                        @case('gestor')
+                                                            <span class="badge bg-primary text-white">Gestor</span>
+                                                            @break
+                                                        @case('fornecedor')
+                                                            <span class="badge bg-success text-white">Fornecedor</span>
+                                                            @break
+                                                    @endswitch
+                                                </div>
+                                                <div class="mb-3 fs-7 text-secondary border-top pt-2 mt-2">
+                                                    <strong>Vínculo:</strong>
+                                                    @if($user->isSuperAdmin())
+                                                        <span class="text-muted">Acesso Global</span>
+                                                    @elseif($user->isGestor())
+                                                        <span class="text-muted d-block fs-8">Empresa Principal: {{ $user->company->name ?? 'N/A' }}</span>
+                                                        <span class="text-muted d-block fs-8">Empresas: {{ $user->companies->pluck('name')->implode(', ') ?: 'Nenhuma' }}</span>
+                                                    @elseif($user->isFornecedor())
+                                                        <span class="text-muted d-block fs-8">Provedor: {{ $user->provider->name ?? 'N/A' }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                                    @if($user->id !== auth()->id())
+                                                        <form action="{{ route('users.toggle', $user) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <div class="form-check form-switch align-middle mb-0">
+                                                                <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $user->active ? 'checked' : '' }}>
+                                                                <label class="form-check-label fw-bold text-secondary fs-8 ms-1">{{ $user->active ? 'Ativo' : 'Inativo' }}</label>
+                                                            </div>
+                                                        </form>
+                                                    @else
+                                                        <div class="form-check form-switch align-middle mb-0">
+                                                            <input class="form-check-input" type="checkbox" role="switch" checked disabled>
+                                                            <label class="form-check-label fw-bold text-secondary fs-8 ms-1">Ativo</label>
+                                                        </div>
+                                                    @endif
+                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-user"
+                                                            data-id="{{ $user->id }}"
+                                                            data-name="{{ $user->name }}"
+                                                            data-email="{{ $user->email }}"
+                                                            data-role="{{ $user->role }}"
+                                                            data-company-id="{{ $user->company_id }}"
+                                                            data-provider-id="{{ $user->provider_id }}"
+                                                            data-companies="{{ $user->companies->pluck('id')->toJson() }}"
+                                                            data-url="{{ route('users.update', $user) }}">
+                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -462,6 +547,37 @@
                     createModal.show();
                 @endif
             @endif
+
+            // View Mode Toggle
+            const toggleSwitch = document.getElementById('viewModeSwitch');
+            const tableContainer = document.getElementById('view-table-container');
+            const cardContainer = document.getElementById('view-card-container');
+            const modeLabel = document.getElementById('viewModeLabel');
+            
+            if (toggleSwitch && tableContainer && cardContainer) {
+                const savedMode = localStorage.getItem('view_mode_users') || 'table';
+                
+                const setMode = (mode) => {
+                    if (mode === 'card') {
+                        tableContainer.classList.add('d-none');
+                        cardContainer.classList.remove('d-none');
+                        toggleSwitch.checked = true;
+                        if (modeLabel) modeLabel.textContent = 'Cards';
+                    } else {
+                        tableContainer.classList.remove('d-none');
+                        cardContainer.classList.add('d-none');
+                        toggleSwitch.checked = false;
+                        if (modeLabel) modeLabel.textContent = 'Tabela';
+                    }
+                    localStorage.setItem('view_mode_users', mode);
+                };
+                
+                setMode(savedMode);
+                
+                toggleSwitch.addEventListener('change', function() {
+                    setMode(this.checked ? 'card' : 'table');
+                });
+            }
         });
     </script>
 @endpush

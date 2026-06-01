@@ -16,9 +16,16 @@
                             <i class="fa-solid fa-folder-open me-2 text-primary"></i>
                             Lista de Tipos de Documentos (GED)
                         </h5>
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createDocTypeModal">
-                            <i class="fa-solid fa-plus me-1"></i> Novo Tipo de Documento
-                        </button>
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Switch Tabela / Cards -->
+                            <div class="form-check form-switch mb-0 d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" role="switch" id="viewModeSwitch" style="cursor: pointer;">
+                                <label class="form-check-label fw-bold text-muted fs-8 mb-0" for="viewModeSwitch" id="viewModeLabel" style="cursor: pointer; user-select: none;">Tabela</label>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createDocTypeModal">
+                                <i class="fa-solid fa-plus me-1"></i> Novo Tipo de Documento
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -28,7 +35,8 @@
                             <p class="text-muted mb-0">Nenhum tipo de documento cadastrado.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
+                        <!-- MODO TABELA -->
+                        <div id="view-table-container" class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -56,23 +64,17 @@
                                                 @endswitch
                                             </td>
                                             <td class="text-center">
-                                                @if($type->required)
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2">Sim</span>
-                                                @else
-                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2">Não</span>
-                                                @endif
+                                                <form action="{{ route('document-types.toggle', $type) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <div class="form-check form-switch d-inline-block align-middle">
+                                                        <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $type->required ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-bold text-secondary fs-7 ms-1">{{ $type->required ? 'Sim' : 'Não' }}</label>
+                                                    </div>
+                                                </form>
                                             </td>
                                             <td class="text-end px-4">
                                                 <div class="d-flex justify-content-end gap-2">
-                                                    <!-- Toggle Required -->
-                                                    <form action="{{ route('document-types.toggle', $type) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Alternar Obrigatoriedade Padrão">
-                                                            <i class="fa-solid fa-arrows-spin"></i> Alternar
-                                                        </button>
-                                                    </form>
-
                                                     <!-- Edit Button -->
                                                     <button type="button" class="btn btn-sm btn-primary btn-edit-doctype" 
                                                             data-id="{{ $type->id }}"
@@ -89,6 +91,61 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- MODO CARDS -->
+                        <div id="view-card-container" class="p-4 d-none">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                                @foreach($documentTypes as $type)
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border border-light">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="bg-primary-subtle text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="fa-solid fa-folder-open fs-5"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-0 text-dark">{{ $type->name }}</h6>
+                                                        <small class="text-muted">ID: {{ $type->id }}</small>
+                                                    </div>
+                                                </div>
+                                                <p class="mb-2 fs-7 text-secondary" style="min-height: 40px;">
+                                                    {{ Str::limit($type->description ?? 'Sem descrição', 100) }}
+                                                </p>
+                                                <p class="mb-3 fs-7">
+                                                    <strong>Periodicidade:</strong>
+                                                    @switch($type->periodicity)
+                                                        @case('monthly') <span class="badge bg-light text-dark border">Mensal</span> @break
+                                                        @case('quarterly') <span class="badge bg-light text-dark border">Trimestral</span> @break
+                                                        @case('semi-annual') <span class="badge bg-light text-dark border">Semestral</span> @break
+                                                        @case('annual') <span class="badge bg-light text-dark border">Anual</span> @break
+                                                        @case('once') <span class="badge bg-light text-dark border">Único</span> @break
+                                                    @endswitch
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                                                    <form action="{{ route('document-types.toggle', $type) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <div class="form-check form-switch align-middle mb-0">
+                                                            <input class="form-check-input" type="checkbox" role="switch" onChange="this.form.submit()" {{ $type->required ? 'checked' : '' }}>
+                                                            <label class="form-check-label fw-bold text-secondary fs-8 ms-1">Obrigatório</label>
+                                                        </div>
+                                                    </form>
+                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-doctype" 
+                                                            data-id="{{ $type->id }}"
+                                                            data-name="{{ $type->name }}"
+                                                            data-description="{{ $type->description }}"
+                                                            data-periodicity="{{ $type->periodicity }}"
+                                                            data-required="{{ $type->required ? '1' : '0' }}"
+                                                            data-url="{{ route('document-types.update', $type) }}">
+                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -257,6 +314,37 @@
                     createModal.show();
                 @endif
             @endif
+
+            // View Mode Toggle
+            const toggleSwitch = document.getElementById('viewModeSwitch');
+            const tableContainer = document.getElementById('view-table-container');
+            const cardContainer = document.getElementById('view-card-container');
+            const modeLabel = document.getElementById('viewModeLabel');
+            
+            if (toggleSwitch && tableContainer && cardContainer) {
+                const savedMode = localStorage.getItem('view_mode_document_types') || 'table';
+                
+                const setMode = (mode) => {
+                    if (mode === 'card') {
+                        tableContainer.classList.add('d-none');
+                        cardContainer.classList.remove('d-none');
+                        toggleSwitch.checked = true;
+                        if (modeLabel) modeLabel.textContent = 'Cards';
+                    } else {
+                        tableContainer.classList.remove('d-none');
+                        cardContainer.classList.add('d-none');
+                        toggleSwitch.checked = false;
+                        if (modeLabel) modeLabel.textContent = 'Tabela';
+                    }
+                    localStorage.setItem('view_mode_document_types', mode);
+                };
+                
+                setMode(savedMode);
+                
+                toggleSwitch.addEventListener('change', function() {
+                    setMode(this.checked ? 'card' : 'table');
+                });
+            }
         });
     </script>
 @endpush

@@ -32,6 +32,58 @@
 
                 <!-- Right Side Elements -->
                 <ul class="navbar-nav ms-auto">
+                    @php
+                        $navbarAlerts = \App\Models\Alert::where('user_id', auth()->id())->unread()->orderBy('created_at', 'desc')->take(5)->get();
+                        $navbarAlertsCount = \App\Models\Alert::where('user_id', auth()->id())->unread()->count();
+                    @endphp
+
+                    <!-- Notifications Dropdown Menu -->
+                    <li class="nav-item dropdown me-3 align-self-center">
+                        <a class="nav-link position-relative py-1" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                            <i class="fa-solid fa-bell fs-5"></i>
+                            @if($navbarAlertsCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 5px; margin-left: -5px;">
+                                    {{ $navbarAlertsCount }}
+                                </span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end shadow">
+                            <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
+                                {{ $navbarAlertsCount }} Alertas Não Lidos
+                            </span>
+                            <div class="dropdown-divider mb-0"></div>
+                            
+                            @if($navbarAlerts->isEmpty())
+                                <div class="dropdown-item text-center text-muted py-3">
+                                    <i class="fa-solid fa-circle-check text-success mb-2 fs-4"></i>
+                                    <p class="mb-0 fs-7">Nenhuma pendência encontrada</p>
+                                </div>
+                            @else
+                                @foreach($navbarAlerts as $navAlert)
+                                    @php
+                                        $alertIcons = [
+                                            'new_request' => 'fa-envelope text-primary',
+                                            'request_deadline' => 'fa-clock text-warning',
+                                            'obligation_deadline' => 'fa-circle-exclamation text-danger',
+                                            'request_response' => 'fa-reply text-success',
+                                        ];
+                                        $alertIcon = $alertIcons[$navAlert->type] ?? 'fa-bell text-secondary';
+                                    @endphp
+                                    <a href="{{ route('alerts.go', $navAlert) }}" class="dropdown-item d-flex align-items-center py-2 border-bottom">
+                                        <i class="fa-solid {{ $alertIcon }} me-3 fs-5"></i>
+                                        <div style="white-space: normal;">
+                                            <p class="mb-0 fw-bold fs-7" style="line-height: 1.2;">{{ $navAlert->title }}</p>
+                                            <p class="mb-0 text-muted fs-8" style="line-height: 1.2;">{{ $navAlert->message }}</p>
+                                        </div>
+                                    </a>
+                                @endforeach
+                                <div class="dropdown-divider mt-0"></div>
+                                <a href="{{ route('dashboard') }}" class="dropdown-item dropdown-footer text-center text-primary py-2 fw-bold fs-7">
+                                    Ver todos os alertas no Dashboard
+                                </a>
+                            @endif
+                        </div>
+                    </li>
                     @if(auth()->check() && (auth()->user()->isSuperAdmin() || (auth()->user()->isGestor() && auth()->user()->companies()->count() > 1)))
                         @php
                             if (auth()->user()->isSuperAdmin()) {
@@ -148,45 +200,21 @@
                             </a>
                         </li>
 
-                        @if(auth()->user()->isSuperAdmin() || auth()->user()->isGestor())
-                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Administrativo</div>
+                        @if(auth()->user()->isSuperAdmin())
+                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Administrador Global</div>
                             
-                            @if(auth()->user()->isSuperAdmin())
-                                <li class="nav-item">
-                                    <a href="{{ route('companies.index') }}" class="nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fa-solid fa-building"></i>
-                                        <p>Empresas Contratantes</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('document-types.index') }}" class="nav-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}">
-                                        <i class="nav-icon fa-solid fa-folder-open"></i>
-                                        <p>Tipos de Documentos</p>
-                                    </a>
-                                </li>
-                            @endif
-
                             <li class="nav-item">
-                                <a href="{{ route('providers.index') }}" class="nav-link {{ request()->routeIs('providers.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-handshake"></i>
-                                    <p>Fornecedores</p>
+                                <a href="{{ route('companies.index') }}" class="nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-building"></i>
+                                    <p>Empresas Contratantes</p>
                                 </a>
                             </li>
-
                             <li class="nav-item">
-                                <a href="{{ route('contracts.index') }}" class="nav-link {{ request()->routeIs('contracts.*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-file-contract"></i>
-                                    <p>Contratos</p>
+                                <a href="{{ route('document-types.index') }}" class="nav-link {{ request()->routeIs('document-types.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-folder-open"></i>
+                                    <p>Tipos de Documentos</p>
                                 </a>
                             </li>
-
-                            <li class="nav-item">
-                                <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-check-double"></i>
-                                    <p>Aprovações de GED</p>
-                                </a>
-                            </li>
-
                             <li class="nav-item">
                                 <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                                     <i class="nav-icon fa-solid fa-users"></i>
@@ -195,8 +223,31 @@
                             </li>
                         @endif
 
+                        @if(auth()->user()->isGestor())
+                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Gestão de Contratos</div>
+                            
+                            <li class="nav-item">
+                                <a href="{{ route('providers.index') }}" class="nav-link {{ request()->routeIs('providers.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-handshake"></i>
+                                    <p>Fornecedores</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('contracts.index') }}" class="nav-link {{ request()->routeIs('contracts.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-file-contract"></i>
+                                    <p>Contratos</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-check-double"></i>
+                                    <p>Aprovações de GED</p>
+                                </a>
+                            </li>
+                        @endif
+
                         @if(auth()->user()->isFornecedor())
-                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Fornecedor</div>
+                            <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Portal do Fornecedor</div>
                             
                             <li class="nav-item">
                                 <a href="{{ route('contracts.index') }}" class="nav-link {{ request()->routeIs('contracts.*') ? 'active' : '' }}">
@@ -204,7 +255,6 @@
                                     <p>Meus Contratos</p>
                                 </a>
                             </li>
-
                             <li class="nav-item">
                                 <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
                                     <i class="nav-icon fa-solid fa-upload"></i>
