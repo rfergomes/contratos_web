@@ -24,102 +24,104 @@
                             <p class="text-muted mb-0">Nenhuma obrigação documental pendente vinculada aos seus contratos.</p>
                         </div>
                     @else
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Contrato</th>
-                                        <th>Tipo de Documento</th>
-                                        <th>Periodicidade</th>
-                                        <th>Prazo Limite</th>
-                                        <th class="text-center">Status</th>
-                                        <th>Arquivo Enviado</th>
-                                        <th class="text-end px-4">Ação / Upload</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($documents as $doc)
-                                        <tr>
-                                            <td>
-                                                <div class="fw-bold">{{ $doc->contract->contract_number }}</div>
-                                                <span class="text-muted fs-7">{{ $doc->contract->title }}</span>
-                                            </td>
-                                            <td>
-                                                <div class="fw-bold">{{ $doc->documentType->name }}</div>
-                                                <span class="text-muted fs-7 d-block">{{ $doc->documentType->description }}</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-secondary-subtle text-secondary-emphasis">
-                                                    @switch($doc->documentType->periodicity)
-                                                        @case('monthly') Mensal @break
-                                                        @case('quarterly') Trimestral @break
-                                                        @case('semi-annual') Semestral @break
-                                                        @case('annual') Anual @break
-                                                        @case('once') Único @break
-                                                    @endswitch
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="fw-bold {{ $doc->due_date->isPast() && $doc->status === 'pending' ? 'text-danger' : 'text-dark' }}">
-                                                    {{ $doc->due_date->format('d/m/Y') }}
-                                                </span>
-                                                @if($doc->due_date->isPast() && $doc->status === 'pending')
-                                                    <span class="badge bg-danger ms-1 fs-8">Atrasado</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @switch($doc->status)
-                                                    @case('pending')
-                                                        <span class="badge bg-danger">Pendente</span>
-                                                        @break
-                                                    @case('submitted')
-                                                        <span class="badge bg-warning text-dark">Aguardando Análise</span>
-                                                        @break
-                                                    @case('approved')
-                                                        <span class="badge bg-success">Aprovado</span>
-                                                        @break
-                                                    @case('rejected')
-                                                        <span class="badge bg-danger">Recusado</span>
-                                                        @break
-                                                @endswitch
-                                            </td>
-                                            <td>
-                                                @if($doc->file_path)
-                                                    <a href="{{ route('ged.download', $doc) }}" class="btn btn-sm btn-link text-decoration-none px-0 fw-bold">
-                                                        <i class="fa-solid fa-file-pdf text-danger me-1"></i>
-                                                        {{ Str::limit($doc->original_name, 25) }}
-                                                    </a>
-                                                    <small class="d-block text-muted fs-8">Enviado em {{ $doc->submitted_at->format('d/m/Y H:i') }}</small>
-                                                @else
-                                                    <span class="text-muted fs-7">—</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end px-4">
-                                                @if($doc->status !== 'approved')
-                                                    <!-- Formulário de Upload -->
-                                                    <form action="{{ route('ged.upload', $doc) }}" method="POST" enctype="multipart/form-data" class="d-flex justify-content-end align-items-center gap-2">
-                                                        @csrf
-                                                        <input type="file" name="file" class="form-control form-control-sm" style="max-width: 220px;" required accept=".pdf,image/*">
-                                                        <button type="submit" class="btn btn-sm btn-primary">
-                                                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Enviar
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Conformidade</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @if($doc->status === 'rejected' && $doc->rejection_reason)
-                                            <tr class="table-danger-subtle">
-                                                <td colspan="7" class="py-2 px-4 fs-7 text-danger">
-                                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                                                    <strong>Motivo da Recusa:</strong> "{{ $doc->rejection_reason }}"
-                                                </td>
-                                            </tr>
-                                        @endif
-                                    @endforeach
-                                </tbody>
-                            </table>
+                        {{-- MODO CARDS (mobile-first, padrão em todos os tamanhos) --}}
+                        <div class="d-grid gap-0">
+                            @foreach($documents as $doc)
+                                @php
+                                    $isOverdue = $doc->due_date->isPast() && $doc->status === 'pending';
+                                    $sideColor = match($doc->status) {
+                                        'approved'  => '#28a745',
+                                        'rejected'  => '#dc3545',
+                                        'submitted' => '#ffc107',
+                                        default     => $isOverdue ? '#dc3545' : '#dee2e6',
+                                    };
+                                @endphp
+                                <div class="border-bottom px-3 py-3" style="border-left: 4px solid {{ $sideColor }} !important;">
+                                    {{-- Linha superior: Contrato + Status --}}
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span class="badge bg-primary-subtle text-primary-emphasis fw-bold">
+                                                {{ $doc->contract->contract_number }}
+                                            </span>
+                                            <span class="text-muted fs-8 ms-1">{{ Str::limit($doc->contract->title, 30) }}</span>
+                                        </div>
+                                        <div>
+                                            @switch($doc->status)
+                                                @case('pending')
+                                                    <span class="badge bg-danger">Pendente</span>
+                                                    @break
+                                                @case('submitted')
+                                                    <span class="badge bg-warning text-dark">Em Análise</span>
+                                                    @break
+                                                @case('approved')
+                                                    <span class="badge bg-success">Aprovado</span>
+                                                    @break
+                                                @case('rejected')
+                                                    <span class="badge bg-danger">Recusado</span>
+                                                    @break
+                                            @endswitch
+                                        </div>
+                                    </div>
+
+                                    {{-- Nome e descrição do documento --}}
+                                    <div class="fw-semibold text-dark mb-1">{{ $doc->documentType->name }}</div>
+                                    @if($doc->documentType->description)
+                                        <div class="text-muted fs-8 mb-2">{{ $doc->documentType->description }}</div>
+                                    @endif
+
+                                    {{-- Periodicidade + Prazo --}}
+                                    <div class="d-flex gap-2 flex-wrap mb-2">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                                            @switch($doc->documentType->periodicity)
+                                                @case('monthly') Mensal @break
+                                                @case('quarterly') Trimestral @break
+                                                @case('semi-annual') Semestral @break
+                                                @case('annual') Anual @break
+                                                @case('once') Único @break
+                                            @endswitch
+                                        </span>
+                                        <span class="badge {{ $isOverdue ? 'bg-danger' : 'bg-light text-dark border' }}">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            Prazo: {{ $doc->due_date->format('d/m/Y') }}
+                                            @if($isOverdue) · Atrasado @endif
+                                        </span>
+                                    </div>
+
+                                    {{-- Arquivo enviado --}}
+                                    @if($doc->file_path)
+                                        <div class="mb-2">
+                                            <a href="{{ route('ged.download', $doc) }}" class="btn btn-sm btn-link text-decoration-none px-0 fw-bold">
+                                                <i class="fa-solid fa-file-pdf text-danger me-1"></i>
+                                                {{ Str::limit($doc->original_name, 30) }}
+                                            </a>
+                                            <small class="d-block text-muted fs-8">Enviado em {{ $doc->submitted_at->format('d/m/Y H:i') }}</small>
+                                        </div>
+                                    @endif
+
+                                    {{-- Motivo de recusa --}}
+                                    @if($doc->status === 'rejected' && $doc->rejection_reason)
+                                        <div class="alert alert-danger py-2 px-3 fs-8 mb-2">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                            <strong>Motivo da Recusa:</strong> "{{ $doc->rejection_reason }}"
+                                        </div>
+                                    @endif
+
+                                    {{-- Ação de upload --}}
+                                    @if($doc->status !== 'approved')
+                                        <form action="{{ route('ged.upload', $doc) }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2 flex-wrap mt-2">
+                                            @csrf
+                                            <input type="file" name="file" class="form-control form-control-sm flex-grow-1" required accept=".pdf,image/*">
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Enviar
+                                            </button>
+                                        </form>
+                                    @else
+                                        <div class="text-success fs-7 mt-1">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Conformidade Confirmada
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
                         </div>
                     @endif
                 </div>
