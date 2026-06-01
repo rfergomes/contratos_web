@@ -81,7 +81,7 @@ class ContractController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'alert_days' => $request->alert_days ?? 30,
-            'status' => 'active',
+            'status' => 'pending',
         ]);
 
         // Gera as obrigações documentais se houver tipos selecionados
@@ -129,7 +129,7 @@ class ContractController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'alert_days' => 'required|integer|min:0|max:365',
-            'status' => 'required|in:active,expired,suspended,draft',
+            'status' => 'required|in:pending,active,expired,suspended,draft',
         ]);
 
         $oldStatus = $contract->status;
@@ -244,5 +244,36 @@ class ContractController extends Controller
         );
 
         return back()->with('success', 'Nova obrigação documental adicionada com sucesso!');
+    }
+
+    /**
+     * Valida a assinatura do contrato.
+     */
+    public function validateSignature(Contract $contract)
+    {
+        $user = auth()->user();
+
+        // Apenas Gestores e SuperAdmin podem validar a assinatura
+        if ($user->isFornecedor()) {
+            abort(403);
+        }
+
+        if ($user->isGestor() && $contract->company_id !== $user->company_id) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        $contract->update([
+            'signature_validated' => true,
+        ]);
+
+        // Registrar no histórico do contrato
+        \App\Models\ContractHistory::log(
+            $contract->id,
+            'signature_validated',
+            'Assinatura Validada',
+            'A assinatura do contrato foi validada e confirmada por ' . $user->name
+        );
+
+        return back()->with('success', 'Assinatura do contrato validada com sucesso! O status foi atualizado.');
     }
 }

@@ -16,6 +16,20 @@ class ContractDocument extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new \App\Models\Scopes\DocumentScope);
+
+        static::saved(function ($document) {
+            $contract = $document->contract()->first();
+            if ($contract) {
+                $contract->updateStatusFromObligationsAndSignature();
+            }
+        });
+
+        static::deleted(function ($document) {
+            $contract = $document->contract()->first();
+            if ($contract) {
+                $contract->updateStatusFromObligationsAndSignature();
+            }
+        });
     }
 
     protected $fillable = [

@@ -215,6 +215,9 @@
                                             </td>
                                             <td class="text-center">
                                                 @switch($contract->status)
+                                                    @case('pending')
+                                                        <span class="badge bg-info">Pendente</span>
+                                                        @break
                                                     @case('active')
                                                         <span class="badge bg-success">Ativo</span>
                                                         @break

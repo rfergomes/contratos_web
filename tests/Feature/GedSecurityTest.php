@@ -48,6 +48,7 @@ class GedSecurityTest extends TestCase
             'title' => 'Contrato 1',
             'start_date' => '2026-01-01',
             'end_date' => '2026-12-31',
+            'signature_validated' => true,
         ]);
 
         $contract2 = Contract::create([
@@ -57,6 +58,7 @@ class GedSecurityTest extends TestCase
             'title' => 'Contrato 2',
             'start_date' => '2026-01-01',
             'end_date' => '2026-12-31',
+            'signature_validated' => true,
         ]);
 
         // Documento do Contrato 1

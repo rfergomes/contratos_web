@@ -82,6 +82,14 @@ class PublicAccessController extends Controller
                  . "Por favor, acesse o link temporário seguro para responder:\n"
                  . $link;
 
+        // Registrar no histórico do contrato
+        \App\Models\ContractHistory::log(
+            $request->contract_id,
+            'whatsapp_charge',
+            'Cobrança via WhatsApp',
+            'Uma cobrança/notificação sobre a solicitação "' . $request->title . '" foi gerada para envio via WhatsApp por ' . Auth::user()->name
+        );
+
         return response()->json([
             'status' => 'success',
             'link' => $link,
@@ -102,6 +110,14 @@ class PublicAccessController extends Controller
         $message = "Olá! O documento '{$document->documentType->name}' do Contrato {$document->contract->contract_number} está pendente de envio.\n\n"
                  . "Por favor, acesse o link temporário seguro para fazer o upload:\n"
                  . $link;
+
+        // Registrar no histórico do contrato
+        \App\Models\ContractHistory::log(
+            $document->contract_id,
+            'whatsapp_charge',
+            'Cobrança via WhatsApp',
+            'Uma cobrança/notificação sobre o documento "' . $document->documentType->name . '" foi gerada para envio via WhatsApp por ' . Auth::user()->name
+        );
 
         return response()->json([
             'status' => 'success',

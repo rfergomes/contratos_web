@@ -16,6 +16,20 @@
                             <i class="fa-solid fa-users me-2 text-primary"></i>
                             Lista de Usuários
                         </h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="btn-group btn-group-sm me-2" role="group" aria-label="Visualização">
+                                <button type="button" class="btn btn-outline-info btn-view-table" title="Visualização em Tabela">
+                                    <i class="ti ti-list"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-view-cards" title="Visualização em Cards">
+                                    <i class="ti ti-layout-grid"></i>
+                                </button>
+                            </div>
+
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                                <i class="fa-solid fa-user-plus me-1"></i> Novo Usuário
+                            </button>
+                        </div>
                         <div class="d-flex align-items-center gap-3">
                             <!-- Switch Tabela / Cards -->
                             <div class="form-check form-switch mb-0 d-flex align-items-center">

@@ -77,6 +77,9 @@
                                             </td>
                                             <td class="text-center">
                                                 @switch($contract->status)
+                                                    @case('pending')
+                                                        <span class="badge bg-info">Pendente</span>
+                                                        @break
                                                     @case('active')
                                                         <span class="badge bg-success">Ativo</span>
                                                         @break
@@ -140,6 +143,9 @@
                                                     </div>
                                                     <div>
                                                         @switch($contract->status)
+                                                            @case('pending')
+                                                                <span class="badge bg-info">Pendente</span>
+                                                                @break
                                                             @case('active')
                                                                 <span class="badge bg-success">Ativo</span>
                                                                 @break
@@ -437,6 +443,7 @@
                                 <div class="col-md-4 col-12 mb-3">
                                     <label for="edit_status" class="form-label fw-bold">Status:</label>
                                     <select name="status" id="edit_status" class="form-select @if($errors->any() && old('_method') === 'PUT') is-invalid @endif" required>
+                                        <option value="pending">Pendente</option>
                                         <option value="active">Ativo</option>
                                         <option value="expired">Vencido</option>
                                         <option value="suspended">Suspenso</option>

@@ -57,6 +57,25 @@
                             <strong>Descrição do Objeto:</strong> {{ $contract->description }}
                         </div>
                     @endif
+
+                    <!-- Painel de Validação de Assinatura -->
+                    <div class="mt-3 p-3 border rounded @if($contract->signature_validated) bg-success-subtle border-success-subtle @else bg-warning-subtle border-warning-subtle @endif d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="fs-7">
+                            @if($contract->signature_validated)
+                                <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> <strong>Assinatura Confirmada:</strong> A assinatura deste contrato foi validada e confirmada.</span>
+                            @else
+                                <span class="text-warning-emphasis"><i class="fa-solid fa-circle-exclamation me-1"></i> <strong>Assinatura Pendente:</strong> Aguardando validação de assinatura (coleta de firmas).</span>
+                            @endif
+                        </div>
+                        @if(!auth()->user()->isFornecedor() && !$contract->signature_validated)
+                            <form action="{{ route('contracts.validate-signature', $contract) }}" method="POST" class="m-0">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fa-solid fa-signature me-1"></i> Validar/Confirmar Assinatura
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,7 +153,13 @@
                                 @if($step3 === 'completed') <i class="fa-solid fa-check"></i> @else 3 @endif
                             </div>
                             <div class="stepper-title">Assinatura</div>
-                            <div class="stepper-desc">Coleta de firmas</div>
+                            <div class="stepper-desc">
+                                @if($contract->signature_validated)
+                                    Assinatura Confirmada
+                                @else
+                                    Coleta de Firmas
+                                @endif
+                            </div>
                         </li>
                         <!-- Passo 4: Ativo -->
                         <li class="stepper-item {{ $step4 }}">
@@ -189,6 +214,14 @@
                                         $badgeIcon = 'fa-solid fa-circle-notch';
                                         $badgeBg = 'bg-secondary';
                                         switch($history->action) {
+                                            case 'whatsapp_charge':
+                                                $badgeIcon = 'fa-brands fa-whatsapp';
+                                                $badgeBg = 'bg-success';
+                                                break;
+                                            case 'signature_validated':
+                                                $badgeIcon = 'fa-solid fa-signature';
+                                                $badgeBg = 'bg-success';
+                                                break;
                                             case 'created':
                                                 $badgeIcon = 'fa-solid fa-plus';
                                                 $badgeBg = 'bg-primary';

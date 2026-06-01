@@ -41,6 +41,7 @@ class ContractExpiryAlertTest extends TestCase
             'end_date' => now()->addDays(30),
             'alert_days' => 30,
             'status' => 'active',
+            'signature_validated' => true,
         ]);
 
         // Contrato 2: Vence em 40 dias com alerta de 30 dias (não deve disparar hoje!)
@@ -54,6 +55,7 @@ class ContractExpiryAlertTest extends TestCase
             'end_date' => now()->addDays(40),
             'alert_days' => 30,
             'status' => 'active',
+            'signature_validated' => true,
         ]);
 
         // Executa o comando Artisan

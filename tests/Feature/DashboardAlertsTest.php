@@ -67,6 +67,7 @@ class DashboardAlertsTest extends TestCase
             'end_date' => now()->addYear()->toDateString(),
             'alert_days' => 30,
             'status' => 'active',
+            'signature_validated' => true,
             'responsible_id' => $this->gestorAlpha->id,
         ]);
     }

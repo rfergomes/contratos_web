@@ -86,6 +86,7 @@ Route::middleware(['auth'])->group(function () {
     // Rotas de Contratos
     Route::resource('contracts', ContractController::class)->except(['destroy', 'create', 'edit']);
     Route::post('/contracts/{contract}/documents', [ContractController::class, 'addObligation'])->name('contracts.documents.store');
+    Route::post('/contracts/{contract}/validate-signature', [ContractController::class, 'validateSignature'])->name('contracts.validate-signature');
     Route::post('/contracts/{contract}/requests', [ContractRequestController::class, 'store'])->name('contracts.requests.store');
     Route::post('/contracts/requests/{contractRequest}/respond', [ContractRequestController::class, 'respond'])->name('contracts.requests.respond');
     Route::get('/contracts/requests/{contractRequest}/download/{side}', [ContractRequestController::class, 'downloadAttachment'])->name('contracts.requests.download');
