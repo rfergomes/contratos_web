@@ -12,9 +12,51 @@ use Illuminate\Support\Facades\Auth;
 class PublicAccessController extends Controller
 {
     /**
-     * Valida o token temporário, autentica o fornecedor e o redireciona ao recurso.
+     * Exibe a página intermediária de confirmação de acesso (evita crawlers de consumirem o token).
      */
-    public function login(string $token)
+    public function showLandingPage(string $token)
+    {
+        $accessToken = TemporaryAccessToken::where('token', $token)->first();
+
+        if (!$accessToken || $accessToken->expires_at->isPast()) {
+            if ($accessToken) {
+                $accessToken->delete(); // Limpa token expirado
+            }
+            return redirect()->route('login')->with('error', 'O link de acesso expirou ou é inválido.');
+        }
+
+        $item = $accessToken->tokenable;
+        if (!$item) {
+            $accessToken->delete();
+            return redirect()->route('login')->with('error', 'O recurso associado a este link não existe mais.');
+        }
+
+        $contract = $item->contract;
+        if (!$contract) {
+            $accessToken->delete();
+            return redirect()->route('login')->with('error', 'Contrato não encontrado para este recurso.');
+        }
+
+        $resourceName = '';
+        if ($accessToken->tokenable_type === ContractRequest::class) {
+            $resourceName = 'Solicitação: ' . $item->title;
+        } elseif ($accessToken->tokenable_type === ContractDocument::class) {
+            $resourceName = 'Obrigação Documental: ' . $item->documentType->name;
+        }
+
+        return view('auth.magic_login', [
+            'token' => $token,
+            'contract' => $contract,
+            'provider' => $contract->provider,
+            'company' => $contract->company,
+            'resourceName' => $resourceName,
+        ]);
+    }
+
+    /**
+     * Valida o token temporário, autentica o fornecedor e o redireciona ao recurso (via POST).
+     */
+    public function authenticate(string $token)
     {
         $accessToken = TemporaryAccessToken::where('token', $token)->first();
 

@@ -147,16 +147,21 @@ class MagicLoginLinkTest extends TestCase
     }
 
     /**
-     * Teste: Token inválido ou expirado redireciona para login com erro.
+     * Teste: Token inválido ou expirado redireciona para login com erro (GET e POST).
      */
     public function test_invalid_or_expired_token_redirects_to_login(): void
     {
-        // 1. Token inexistente
+        // 1. Token inexistente GET
         $response = $this->get(route('public.access', 'invalid-token-12345'));
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('error', 'O link de acesso expirou ou é inválido.');
 
-        // 2. Token expirado
+        // 2. Token inexistente POST
+        $responsePost = $this->post(route('public.access.authenticate', 'invalid-token-12345'));
+        $responsePost->assertRedirect(route('login'));
+        $responsePost->assertSessionHas('error', 'O link de acesso expirou ou é inválido.');
+
+        // 3. Token expirado GET
         $token = TemporaryAccessToken::generateFor($this->contractRequest);
         $token->update(['expires_at' => now()->subMinutes(1)]);
 
@@ -164,43 +169,74 @@ class MagicLoginLinkTest extends TestCase
         $response2->assertRedirect(route('login'));
         $response2->assertSessionHas('error', 'O link de acesso expirou ou é inválido.');
         $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token->id]);
+
+        // 4. Token expirado POST
+        $token2 = TemporaryAccessToken::generateFor($this->contractRequest);
+        $token2->update(['expires_at' => now()->subMinutes(1)]);
+
+        $response2Post = $this->post(route('public.access.authenticate', $token2->token));
+        $response2Post->assertRedirect(route('login'));
+        $response2Post->assertSessionHas('error', 'O link de acesso expirou ou é inválido.');
+        $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token2->id]);
     }
 
     /**
-     * Teste: Magic link de solicitação faz login e redireciona corretamento para o contrato.
+     * Teste: Magic link de solicitação exibe landing page no GET e faz login/redireciona no POST.
      */
     public function test_magic_link_login_and_redirect_for_request(): void
     {
         $token = TemporaryAccessToken::generateFor($this->contractRequest);
 
-        $response = $this->get(route('public.access', $token->token));
+        // 1. GET: Exibe landing page
+        $responseGet = $this->get(route('public.access', $token->token));
+        $responseGet->assertStatus(200);
+        $responseGet->assertViewIs('auth.magic_login');
+        
+        // Não deve ter logado ainda
+        $this->assertFalse(Auth::check());
+        // Token não deve ter sido apagado
+        $this->assertDatabaseHas('temporary_access_tokens', ['id' => $token->id]);
+
+        // 2. POST: Efetua o login e consome o token
+        $responsePost = $this->post(route('public.access.authenticate', $token->token));
         
         // Deve autenticar o fornecedorBeta
         $this->assertTrue(Auth::check());
         $this->assertEquals($this->fornecedorBeta->id, Auth::id());
 
         // Deve redirecionar para a página do contrato com a âncora do timeline
-        $response->assertRedirect(route('contracts.show', $this->contract->id) . '#timeline');
+        $responsePost->assertRedirect(route('contracts.show', $this->contract->id) . '#timeline');
 
         // Deve deletar o token para uso único (Single-Use)
         $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token->id]);
     }
 
     /**
-     * Teste: Magic link de documento faz login e redireciona corretamente para o GED.
+     * Teste: Magic link de documento exibe landing page no GET e faz login/redireciona no POST.
      */
     public function test_magic_link_login_and_redirect_for_document(): void
     {
         $token = TemporaryAccessToken::generateFor($this->contractDocument);
 
-        $response = $this->get(route('public.access', $token->token));
+        // 1. GET: Exibe landing page
+        $responseGet = $this->get(route('public.access', $token->token));
+        $responseGet->assertStatus(200);
+        $responseGet->assertViewIs('auth.magic_login');
+
+        // Não deve ter logado ainda
+        $this->assertFalse(Auth::check());
+        // Token não deve ter sido apagado
+        $this->assertDatabaseHas('temporary_access_tokens', ['id' => $token->id]);
+
+        // 2. POST: Efetua o login e consome o token
+        $responsePost = $this->post(route('public.access.authenticate', $token->token));
 
         // Deve autenticar o fornecedorBeta
         $this->assertTrue(Auth::check());
         $this->assertEquals($this->fornecedorBeta->id, Auth::id());
 
         // Deve redirecionar para o GED
-        $response->assertRedirect(route('ged.index'));
+        $responsePost->assertRedirect(route('ged.index'));
 
         // Deve deletar o token
         $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token->id]);

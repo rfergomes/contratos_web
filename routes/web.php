@@ -50,7 +50,8 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('guest')
     ->name('password.update');
 
-Route::get('/public/access/{token}', [PublicAccessController::class, 'login'])->name('public.access');
+Route::get('/public/access/{token}', [PublicAccessController::class, 'showLandingPage'])->name('public.access');
+Route::post('/public/access/{token}', [PublicAccessController::class, 'authenticate'])->name('public.access.authenticate');
 
 // Área Autenticada
 Route::middleware(['auth'])->group(function () {

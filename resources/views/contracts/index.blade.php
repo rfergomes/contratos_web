@@ -17,10 +17,14 @@
                             Lista de Contratos
                         </h5>
                         <div class="d-flex align-items-center gap-3">
-                            <!-- Switch Tabela / Cards -->
-                            <div class="form-check form-switch mb-0 d-flex align-items-center">
-                                <input class="form-check-input me-2" type="checkbox" role="switch" id="viewModeSwitch" style="cursor: pointer;">
-                                <label class="form-check-label fw-bold text-muted fs-8 mb-0" for="viewModeSwitch" id="viewModeLabel" style="cursor: pointer; user-select: none;">Tabela</label>
+                            <!-- Alternador Tabela / Cards -->
+                            <div class="view-mode-toggle-wrapper">
+                                <button type="button" class="view-mode-btn" id="viewModeTableBtn" title="Visualização em Tabela">
+                                    <i class="fa-solid fa-list-ul"></i>
+                                </button>
+                                <button type="button" class="view-mode-btn" id="viewModeCardBtn" title="Visualização em Cards">
+                                    <i class="fa-solid fa-table-cells-large"></i>
+                                </button>
                             </div>
                             @if(!auth()->user()->isFornecedor())
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
@@ -579,34 +583,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toggleSwitch = document.getElementById('viewModeSwitch');
+            const toggleTableBtn = document.getElementById('viewModeTableBtn');
+            const toggleCardBtn = document.getElementById('viewModeCardBtn');
             const tableContainer = document.getElementById('view-table-container');
             const cardContainer = document.getElementById('view-card-container');
-            const modeLabel = document.getElementById('viewModeLabel');
             
-            if (toggleSwitch && tableContainer && cardContainer) {
+            if (toggleTableBtn && toggleCardBtn && tableContainer && cardContainer) {
                 const savedMode = localStorage.getItem('view_mode_contracts') || 'table';
                 
                 const setMode = (mode) => {
                     if (mode === 'card') {
                         tableContainer.classList.add('d-none');
                         cardContainer.classList.remove('d-none');
-                        toggleSwitch.checked = true;
-                        if (modeLabel) modeLabel.textContent = 'Cards';
+                        toggleTableBtn.classList.remove('active');
+                        toggleCardBtn.classList.add('active');
                     } else {
                         tableContainer.classList.remove('d-none');
                         cardContainer.classList.add('d-none');
-                        toggleSwitch.checked = false;
-                        if (modeLabel) modeLabel.textContent = 'Tabela';
+                        toggleTableBtn.classList.add('active');
+                        toggleCardBtn.classList.remove('active');
                     }
                     localStorage.setItem('view_mode_contracts', mode);
                 };
                 
                 setMode(savedMode);
                 
-                toggleSwitch.addEventListener('change', function() {
-                    setMode(this.checked ? 'card' : 'table');
-                });
+                toggleTableBtn.addEventListener('click', () => setMode('table'));
+                toggleCardBtn.addEventListener('click', () => setMode('card'));
             }
         });
     </script>
