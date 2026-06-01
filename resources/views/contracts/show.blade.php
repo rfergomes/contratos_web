@@ -467,6 +467,13 @@
                                                             @case('other') Outro @break
                                                         @endswitch
                                                     </span>
+                                                    @if(!auth()->user()->isFornecedor() && $req->status === 'pending')
+                                                        <div class="mt-2 text-start">
+                                                            <button type="button" class="btn btn-xs btn-success btn-whatsapp-notify" data-id="{{ $req->id }}" data-type="request" title="Notificar via WhatsApp">
+                                                                <i class="fa-brands fa-whatsapp me-1"></i> Notificar via WhatsApp
+                                                            </button>
+                                                        </div>
+                                                    @endif
 
                                                     @if($req->status !== 'pending')
                                                         <hr class="my-2">
@@ -587,6 +594,11 @@
                                                             </form>
                                                             <button type="button" class="btn btn-xs btn-danger py-0.5 px-1.5 btn-reject-doc" data-id="{{ $doc->id }}" data-url="{{ route('ged.reject', $doc) }}" data-name="{{ $doc->documentType->name }}">
                                                                 <i class="fa-solid fa-xmark"></i>
+                                                            </button>
+                                                        @endif
+                                                        @if(in_array($doc->status, ['pending', 'rejected']))
+                                                            <button type="button" class="btn btn-xs btn-success py-0.5 px-1.5 btn-whatsapp-notify" data-id="{{ $doc->id }}" data-type="document" title="Cobrar Envio via WhatsApp">
+                                                                <i class="fa-brands fa-whatsapp"></i> Cobrar
                                                             </button>
                                                         @endif
                                                     @endif
@@ -820,6 +832,112 @@
                     });
                 });
             });
+
+            // Lógica do Modal WhatsApp
+            const waModalEl = document.getElementById('whatsappNotifyModal');
+            if (waModalEl) {
+                const waModal = new bootstrap.Modal(waModalEl);
+                const waResourceId = document.getElementById('wa-resource-id');
+                const waResourceType = document.getElementById('wa-resource-type');
+
+                document.querySelectorAll('.btn-whatsapp-notify').forEach(button => {
+                    button.addEventListener('click', function() {
+                        waResourceId.value = this.getAttribute('data-id');
+                        waResourceType.value = this.getAttribute('data-type');
+                        waModal.show();
+                    });
+                });
+
+                document.querySelectorAll('.btn-select-wa-contact').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const phone = this.getAttribute('data-phone');
+                        const id = waResourceId.value;
+                        const type = waResourceType.value;
+                        
+                        if (!phone) {
+                            toastr.error('Este contato não possui telefone cadastrado.');
+                            return;
+                        }
+
+                        const url = type === 'request' 
+                            ? `/contracts/requests/${id}/whatsapp-link`
+                            : `/contracts/documents/${id}/whatsapp-link`;
+
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(res => {
+                            if (res.status === 'success') {
+                                waModal.hide();
+                                toastr.success('Link mágico gerado com sucesso!');
+                                
+                                const text = encodeURIComponent(res.message);
+                                const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${text}`;
+                                
+                                window.open(waUrl, '_blank');
+                            } else {
+                                toastr.error('Erro ao gerar link de notificação.');
+                            }
+                        })
+                        .catch(err => {
+                            toastr.error('Falha na comunicação com o servidor.');
+                            console.error(err);
+                        });
+                    });
+                });
+            }
         });
     </script>
 @endpush
+
+<!-- MODAL DE SELEÇÃO DE CONTATO WHATSAPP -->
+<div class="modal fade" id="whatsappNotifyModal" tabindex="-1" aria-labelledby="whatsappNotifyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="whatsappNotifyModalLabel">
+                    <i class="fa-brands fa-whatsapp text-success me-2"></i> Notificar via WhatsApp
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="wa-resource-id" value="">
+                <input type="hidden" id="wa-resource-type" value="">
+                
+                <p class="fs-7 text-secondary">Selecione o contato do fornecedor <strong>{{ $contract->provider->name }}</strong> para enviar a notificação:</p>
+                
+                <div class="list-group mb-3" id="wa-contacts-list">
+                    @if($contract->provider->contacts->isEmpty())
+                        <div class="text-center p-3 text-muted">
+                            <i class="fa-solid fa-users fa-2x mb-2"></i>
+                            <p class="mb-0 fs-7">Nenhum contato cadastrado para este fornecedor.</p>
+                            <p class="fs-8 mb-0">Cadastre contatos em <a href="{{ route('providers.index') }}">Gerenciar Fornecedores</a>.</p>
+                        </div>
+                    @else
+                        @foreach($contract->provider->contacts as $contact)
+                            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center btn-select-wa-contact" data-phone="{{ preg_replace('/\D/', '', $contact->phone) }}">
+                                <div>
+                                    <strong>{{ $contact->name }}</strong>
+                                    @if($contact->is_main)
+                                        <span class="badge bg-success ms-1">Principal</span>
+                                    @endif
+                                    <div class="text-muted fs-8">{{ $contact->phone ?? 'Sem telefone' }} | {{ $contact->email ?? 'Sem e-mail' }}</div>
+                                </div>
+                                <i class="fa-brands fa-whatsapp text-success fs-5"></i>
+                            </button>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+

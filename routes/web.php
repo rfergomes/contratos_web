@@ -15,6 +15,7 @@ use App\Http\Controllers\ContractRequestController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ProviderContactController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PublicAccessController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -48,6 +49,8 @@ Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showRese
 Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('guest')
     ->name('password.update');
+
+Route::get('/public/access/{token}', [PublicAccessController::class, 'login'])->name('public.access');
 
 // Área Autenticada
 Route::middleware(['auth'])->group(function () {
@@ -86,6 +89,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/contracts/{contract}/requests', [ContractRequestController::class, 'store'])->name('contracts.requests.store');
     Route::post('/contracts/requests/{contractRequest}/respond', [ContractRequestController::class, 'respond'])->name('contracts.requests.respond');
     Route::get('/contracts/requests/{contractRequest}/download/{side}', [ContractRequestController::class, 'downloadAttachment'])->name('contracts.requests.download');
+    Route::post('/contracts/requests/{request}/whatsapp-link', [PublicAccessController::class, 'generateRequestLink'])->name('contracts.requests.whatsapp-link');
+    Route::post('/contracts/documents/{document}/whatsapp-link', [PublicAccessController::class, 'generateDocumentLink'])->name('contracts.documents.whatsapp-link');
 
     // Rotas de Tipos de Documentos (Obrigações Gerais)
     Route::resource('document-types', DocumentTypeController::class)->except(['destroy', 'create', 'edit']);
