@@ -136,7 +136,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($users as $user)
                                     <div class="col">
-                                        <div class="card h-100 card-info card-outline shadow-sm">
+                                        <div class="card h-100 card-secondary card-outline shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
                                                     <img src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=mp&s=40' }}" 

@@ -69,8 +69,15 @@
                                 </thead>
                                 <tbody>
                                     @foreach($contracts as $contract)
-                                        <tr class="contract-row" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
-                                            <td><strong>{{ $contract->contract_number }}</strong></td>
+                                        <tr class="contract-row" data-management-type="{{ $contract->isInternal() ? 'internal' : 'with_provider' }}">
+                                            <td>
+                                                <strong>{{ $contract->contract_number }}</strong>
+                                                @if($contract->isInternal())
+                                                    <span class="badge bg-secondary d-block mt-1 fs-8">Interno</span>
+                                                @else
+                                                    <span class="badge bg-primary d-block mt-1 fs-8">Externo</span>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <div class="fw-bold">{{ $contract->title }}</div>
                                                 <div class="text-muted fs-7">{{ Str::limit($contract->description, 50) }}</div>
@@ -83,12 +90,12 @@
                                                 <td>{{ $contract->company->name ?? 'N/A' }}</td>
                                             @endif
                                             <td>
-                                                @if($contract->provider)
+                                                @if($contract->isExternal() && $contract->provider)
                                                     <div class="fw-bold">{{ $contract->provider->name }}</div>
                                                     <span class="text-muted fs-7">CNPJ: {{ $contract->provider->cnpj }}</span>
                                                 @else
                                                     <div class="fw-bold text-secondary">Controle Interno</div>
-                                                    <span class="text-muted fs-8">Sem fornecedor</span>
+                                                    <span class="text-muted fs-8">Uso Interno</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -131,6 +138,7 @@
                                                                 data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
                                                                 data-alert-days="{{ $contract->alert_days }}"
                                                                 data-status="{{ $contract->status }}"
+                                                                data-management-type="{{ $contract->management_type }}"
                                                                 data-url="{{ route('contracts.update', $contract) }}">
                                                             <i class="fa-solid fa-pen-to-square"></i> Editar
                                                         </button>
@@ -152,8 +160,8 @@
                         <div id="view-card-container" class="p-4 d-none">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($contracts as $contract)
-                                    <div class="col card-item" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
-                                        <div class="card h-100 shadow-sm border border-light">
+                                    <div class="col card-item" data-management-type="{{ $contract->isInternal() ? 'internal' : 'with_provider' }}">
+                                        <div class="card h-100 card-secondary card-outline shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                                     <div class="d-flex align-items-center">
@@ -165,7 +173,7 @@
                                                             <small class="text-muted">Nº: {{ $contract->contract_number }}</small>
                                                         </div>
                                                     </div>
-                                                    <div>
+                                                    <div class="text-end">
                                                         @switch($contract->status)
                                                             @case('pending')
                                                                 <span class="badge bg-info">Pendente</span>
@@ -183,6 +191,11 @@
                                                                 <span class="badge bg-secondary">Rascunho</span>
                                                                 @break
                                                         @endswitch
+                                                        @if($contract->isInternal())
+                                                            <span class="badge bg-secondary d-block mt-1 fs-8">Interno</span>
+                                                        @else
+                                                            <span class="badge bg-primary d-block mt-1 fs-8">Externo</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 
@@ -192,7 +205,7 @@
                                                     </p>
                                                 @endif
                                                 <p class="mb-2 fs-7 text-secondary">
-                                                    <strong>Fornecedor:</strong> {{ $contract->provider->name ?? 'Controle Interno' }}
+                                                    <strong>Fornecedor:</strong> {{ $contract->isExternal() ? ($contract->provider->name ?? 'N/A') : 'Controle Interno' }}
                                                 </p>
                                                 <p class="mb-2 fs-8 text-muted">
                                                     {{ Str::limit($contract->description, 100) }}
@@ -222,6 +235,7 @@
                                                                 data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
                                                                 data-alert-days="{{ $contract->alert_days }}"
                                                                 data-status="{{ $contract->status }}"
+                                                                data-management-type="{{ $contract->management_type }}"
                                                                 data-url="{{ route('contracts.update', $contract) }}">
                                                             <i class="fa-solid fa-pen-to-square me-1"></i> Editar
                                                         </button>
@@ -255,6 +269,15 @@
                         </div>
                         <div class="modal-body">
                             <div class="row">
+                                <!-- Tipo de Gerenciamento -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="create_management_type" class="form-label fw-bold">Tipo de Gerenciamento:</label>
+                                    <select name="management_type" id="create_management_type" class="form-select" required>
+                                        <option value="external" {{ old('management_type') == 'external' ? 'selected' : '' }}>Fornecedor Externo</option>
+                                        <option value="internal" {{ old('management_type', 'external') == 'internal' ? 'selected' : '' }}>Controle Interno</option>
+                                    </select>
+                                </div>
+
                                 <!-- Empresa (Apenas se Super Admin) -->
                                 @if(auth()->user()->isSuperAdmin())
                                     <div class="col-md-6 col-12 mb-3">
@@ -269,12 +292,14 @@
                                         </select>
                                     </div>
                                 @endif
+                            </div>
 
+                            <div class="row" id="create_provider_wrapper">
                                 <!-- Fornecedor -->
-                                <div class="col-md-{{ auth()->user()->isSuperAdmin() ? '6' : '12' }} col-12 mb-3">
+                                <div class="col-12 mb-3">
                                     <label for="create_provider_id" class="form-label fw-bold">Fornecedor Contratado:</label>
                                     <select name="provider_id" id="create_provider_id" class="form-select @if($errors->any() && !old('_method')) is-invalid @endif">
-                                        <option value="">Controle Interno (Sem fornecedor)</option>
+                                        <option value="">Selecione o fornecedor...</option>
                                         @foreach($providers as $provider)
                                             <option value="{{ $provider->id }}" {{ old('provider_id') == $provider->id ? 'selected' : '' }}>
                                                 {{ $provider->name }}
@@ -406,6 +431,15 @@
                         </div>
                         <div class="modal-body">
                             <div class="row">
+                                <!-- Tipo de Gerenciamento -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="edit_management_type" class="form-label fw-bold">Tipo de Gerenciamento:</label>
+                                    <select name="management_type" id="edit_management_type" class="form-select" required>
+                                        <option value="external">Fornecedor Externo</option>
+                                        <option value="internal">Controle Interno</option>
+                                    </select>
+                                </div>
+
                                 <!-- Empresa (Apenas se Super Admin) -->
                                 @if(auth()->user()->isSuperAdmin())
                                     <div class="col-md-6 col-12 mb-3">
@@ -419,12 +453,14 @@
                                         </select>
                                     </div>
                                 @endif
+                            </div>
 
+                            <div class="row" id="edit_provider_wrapper">
                                 <!-- Fornecedor -->
-                                <div class="col-md-{{ auth()->user()->isSuperAdmin() ? '6' : '12' }} col-12 mb-3">
+                                <div class="col-12 mb-3">
                                     <label for="edit_provider_id" class="form-label fw-bold">Fornecedor Contratado:</label>
                                     <select name="provider_id" id="edit_provider_id" class="form-select @if($errors->any() && old('_method') === 'PUT') is-invalid @endif">
-                                        <option value="">Controle Interno (Sem fornecedor)</option>
+                                        <option value="">Selecione o fornecedor...</option>
                                         @foreach($providers as $provider)
                                             <option value="{{ $provider->id }}" {{ old('provider_id') == $provider->id ? 'selected' : '' }}>
                                                 {{ $provider->name }}
@@ -542,6 +578,45 @@
                 const editEndDateInput = document.getElementById('edit_end_date');
                 const editAlertDaysInput = document.getElementById('edit_alert_days');
                 const editStatusInput = document.getElementById('edit_status');
+                const editManagementTypeInput = document.getElementById('edit_management_type');
+
+                // Lógica de alternar exibição de Fornecedor
+                const createManagementTypeSelect = document.getElementById('create_management_type');
+                const createProviderWrapper = document.getElementById('create_provider_wrapper');
+                
+                const toggleCreateProvider = (type) => {
+                    if (type === 'internal') {
+                        createProviderWrapper.style.display = 'none';
+                        document.getElementById('create_provider_id').value = '';
+                    } else {
+                        createProviderWrapper.style.display = 'block';
+                    }
+                };
+                
+                if (createManagementTypeSelect) {
+                    createManagementTypeSelect.addEventListener('change', function() {
+                        toggleCreateProvider(this.value);
+                    });
+                    toggleCreateProvider(createManagementTypeSelect.value);
+                }
+
+                const editManagementTypeSelect = document.getElementById('edit_management_type');
+                const editProviderWrapper = document.getElementById('edit_provider_wrapper');
+                
+                const toggleEditProvider = (type) => {
+                    if (type === 'internal') {
+                        editProviderWrapper.style.display = 'none';
+                        document.getElementById('edit_provider_id').value = '';
+                    } else {
+                        editProviderWrapper.style.display = 'block';
+                    }
+                };
+                
+                if (editManagementTypeSelect) {
+                    editManagementTypeSelect.addEventListener('change', function() {
+                        toggleEditProvider(this.value);
+                    });
+                }
 
                 // Capturar clique no botão editar
                 document.querySelectorAll('.btn-edit-contract').forEach(button => {
@@ -557,6 +632,7 @@
                         const endDate = this.getAttribute('data-end-date');
                         const alertDays = this.getAttribute('data-alert-days');
                         const status = this.getAttribute('data-status');
+                        const managementType = this.getAttribute('data-management-type') || 'external';
                         const actionUrl = this.getAttribute('data-url');
 
                         // Preencher campos
@@ -572,6 +648,10 @@
                         editEndDateInput.value = endDate;
                         if (editAlertDaysInput) editAlertDaysInput.value = alertDays;
                         editStatusInput.value = status;
+                        if (editManagementTypeInput) {
+                            editManagementTypeInput.value = managementType;
+                            toggleEditProvider(managementType);
+                        }
 
                         // Mostrar modal
                         editModal.show();
@@ -595,9 +675,17 @@
                             editEndDateInput.value = "{{ old('end_date') }}";
                             if (editAlertDaysInput) editAlertDaysInput.value = "{{ old('alert_days') }}";
                             editStatusInput.value = "{{ old('status') }}";
+                            if (editManagementTypeInput) {
+                                const oldMgmtType = "{{ old('management_type') }}";
+                                editManagementTypeInput.value = oldMgmtType;
+                                toggleEditProvider(oldMgmtType);
+                            }
                             editModal.show();
                         }
                     @else
+                        if (createManagementTypeSelect) {
+                            toggleCreateProvider(createManagementTypeSelect.value);
+                        }
                         createModal.show();
                     @endif
                 @endif

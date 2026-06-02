@@ -102,7 +102,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($documentTypes as $type)
                                     <div class="col">
-                                        <div class="card h-100 shadow-sm border border-light">
+                                        <div class="card h-100 card-secondary card-outline shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
                                                     <div class="bg-primary-subtle text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">

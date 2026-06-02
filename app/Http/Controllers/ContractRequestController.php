@@ -19,6 +19,9 @@ class ContractRequestController extends Controller
     {
         $user = Auth::user();
 
+        // Contratos de controle interno não possuem fornecedor e não aceitam solicitações.
+        abort_if($contract->isInternal(), 422, 'Contratos de controle interno não suportam a abertura de solicitações.');
+
         // Validação adicional de ACL por garantia
         if ($user->isFornecedor()) {
             abort_if($contract->provider_id !== $user->provider_id, 403, 'Acesso não autorizado.');

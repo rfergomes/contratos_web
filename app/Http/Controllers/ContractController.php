@@ -56,9 +56,13 @@ class ContractController extends Controller
             $request->merge(['company_id' => $user->company_id]);
         }
 
+        if (! $request->has('management_type')) {
+            $request->merge(['management_type' => 'external']);
+        }
+
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'nullable|exists:providers,id',
+            'provider_id' => 'nullable|required_if:management_type,external|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -68,11 +72,30 @@ class ContractController extends Controller
             'alert_days' => 'required|integer|min:0|max:365',
             'document_types' => 'nullable|array',
             'document_types.*' => 'exists:document_types,id',
+            'management_type' => 'required|in:internal,external',
         ]);
+
+        $managementType = $request->input('management_type', 'external');
+        $providerId = $request->provider_id;
+
+        if ($managementType === 'internal') {
+            $company = Company::findOrFail($request->company_id);
+            $providerName = "Controle Interno - {$company->name}";
+            $provider = Provider::firstOrCreate(
+                ['name' => $providerName],
+                [
+                    'cnpj' => null,
+                    'email' => null,
+                    'phone' => null,
+                    'active' => true,
+                ]
+            );
+            $providerId = $provider->id;
+        }
 
         $contract = Contract::create([
             'company_id' => $request->company_id,
-            'provider_id' => $request->provider_id,
+            'provider_id' => $providerId,
             'responsible_id' => $request->responsible_id ?? auth()->id(),
             'contract_number' => $request->contract_number,
             'title' => $request->title,
@@ -81,6 +104,7 @@ class ContractController extends Controller
             'end_date' => $request->end_date,
             'alert_days' => $request->alert_days ?? 30,
             'status' => 'pending',
+            'management_type' => $managementType,
         ]);
 
         // Gera as obrigações documentais se houver tipos selecionados
@@ -116,9 +140,13 @@ class ContractController extends Controller
             $request->merge(['company_id' => auth()->user()->company_id]);
         }
 
+        if (! $request->has('management_type')) {
+            $request->merge(['management_type' => 'external']);
+        }
+
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'nullable|exists:providers,id',
+            'provider_id' => 'nullable|required_if:management_type,external|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -127,13 +155,32 @@ class ContractController extends Controller
             'end_date' => 'required|date|after:start_date',
             'alert_days' => 'required|integer|min:0|max:365',
             'status' => 'required|in:pending,active,expired,suspended,draft',
+            'management_type' => 'required|in:internal,external',
         ]);
+
+        $managementType = $request->input('management_type', 'external');
+        $providerId = $request->provider_id;
+
+        if ($managementType === 'internal') {
+            $company = Company::findOrFail($request->company_id);
+            $providerName = "Controle Interno - {$company->name}";
+            $provider = Provider::firstOrCreate(
+                ['name' => $providerName],
+                [
+                    'cnpj' => null,
+                    'email' => null,
+                    'phone' => null,
+                    'active' => true,
+                ]
+            );
+            $providerId = $provider->id;
+        }
 
         $oldStatus = $contract->status;
 
         $contract->update([
             'company_id' => $request->company_id,
-            'provider_id' => $request->provider_id,
+            'provider_id' => $providerId,
             'responsible_id' => $request->responsible_id ?? auth()->id(),
             'contract_number' => $request->contract_number,
             'title' => $request->title,
@@ -142,6 +189,7 @@ class ContractController extends Controller
             'end_date' => $request->end_date,
             'alert_days' => $request->alert_days,
             'status' => $request->status,
+            'management_type' => $managementType,
         ]);
 
         // Registrar no histórico do contrato
@@ -163,7 +211,7 @@ class ContractController extends Controller
 
         // Validação adicional de ACL por segurança
         if ($user->isFornecedor()) {
-            abort_if($contract->provider_id !== $user->provider_id, 403, 'Acesso não autorizado.');
+            abort_if($contract->isInternal() || $contract->provider_id !== $user->provider_id, 403, 'Acesso não autorizado.');
         } elseif ($user->isGestor()) {
             abort_if($contract->company_id !== $user->company_id, 403, 'Acesso não autorizado.');
         }
@@ -272,5 +320,38 @@ class ContractController extends Controller
         );
 
         return back()->with('success', 'Assinatura do contrato validada com sucesso! O status foi atualizado.');
+    }
+
+    /**
+     * Registra um evento de histórico manual para o contrato.
+     */
+    public function logHistory(Request $request, Contract $contract)
+    {
+        $user = auth()->user();
+
+        // Apenas gestores e super admins podem registrar histórico manual
+        if ($user->isFornecedor()) {
+            abort(403, 'Fornecedores não têm permissão para registrar eventos no histórico.');
+        }
+
+        if ($user->isGestor() && $contract->company_id !== $user->company_id) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'action_type' => 'nullable|string|in:manual_note,decision,milestone,communication',
+        ]);
+
+        ContractHistory::create([
+            'contract_id' => $contract->id,
+            'user_id' => $user->id,
+            'action' => $request->action_type ?? 'manual_note',
+            'title' => $request->title,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Evento registrado com sucesso no histórico do contrato.');
     }
 }

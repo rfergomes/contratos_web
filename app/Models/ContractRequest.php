@@ -19,7 +19,9 @@ class ContractRequest extends Model
         static::addGlobalScope(new DocumentScope);
 
         static::created(function ($request) {
-            Alert::createForNewRequest($request);
+            if ($request->contract && ! $request->contract->isInternal()) {
+                Alert::createForNewRequest($request);
+            }
         });
     }
 

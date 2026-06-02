@@ -38,12 +38,12 @@
                     <div class="row text-center text-md-start">
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
                             <span class="text-muted fs-8 d-block text-uppercase">Fornecedor Contratado</span>
-                            @if($contract->provider)
+                            @if($contract->isExternal() && $contract->provider)
                                 <strong class="text-dark"><i class="fa-solid fa-handshake me-1 text-primary"></i> {{ $contract->provider->name }}</strong>
                                 <small class="d-block text-muted">CNPJ: {{ $contract->provider->cnpj }}</small>
                             @else
                                 <strong class="text-secondary"><i class="fa-solid fa-handshake me-1 text-muted"></i> Controle Interno</strong>
-                                <small class="d-block text-muted">Sem fornecedor atribuído</small>
+                                <small class="d-block text-muted">Uso Interno</small>
                             @endif
                         </div>
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
@@ -205,11 +205,16 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-secondary">
                         <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i> 
                         Linha do Tempo (Histórico do Contrato)
                     </h6>
+                    @if(!auth()->user()->isFornecedor())
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#logHistoryModal">
+                            <i class="fa-solid fa-plus-circle me-1"></i> Registrar Evento
+                        </button>
+                    @endif
                 </div>
                 <div class="card-body p-0">
                     @if($contract->histories->isEmpty())
@@ -270,6 +275,22 @@
                                                 $badgeIcon = 'fa-solid fa-ban';
                                                 $badgeBg = 'bg-danger';
                                                 break;
+                                            case 'manual_note':
+                                                $badgeIcon = 'fa-solid fa-note-sticky';
+                                                $badgeBg = 'bg-secondary';
+                                                break;
+                                            case 'decision':
+                                                $badgeIcon = 'fa-solid fa-gavel';
+                                                $badgeBg = 'bg-warning text-dark';
+                                                break;
+                                            case 'milestone':
+                                                $badgeIcon = 'fa-solid fa-flag';
+                                                $badgeBg = 'bg-primary';
+                                                break;
+                                            case 'communication':
+                                                $badgeIcon = 'fa-solid fa-comments';
+                                                $badgeBg = 'bg-info';
+                                                break;
                                         }
                                     @endphp
                                     <div class="timeline-horizontal-item">
@@ -305,6 +326,7 @@
     <!-- Seção de Ações: Solicitações e GED lado a lado -->
     <div class="row">
         <!-- 4. Painel de Solicitações Bi-direcionais -->
+        @if(!$contract->isInternal())
         <div class="col-lg-6 col-12 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
@@ -548,9 +570,10 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- 5. GED Integrado (Documentos e Compliance) -->
-        <div class="col-lg-6 col-12 mb-4">
+        <div class="@if($contract->isInternal()) col-12 @else col-lg-6 @endif col-12 mb-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0 text-secondary">
@@ -641,7 +664,7 @@
                                                                 <i class="fa-solid fa-xmark"></i>
                                                             </button>
                                                         @endif
-                                                        @if(in_array($doc->status, ['pending', 'rejected']) && $contract->provider_id)
+                                                        @if(in_array($doc->status, ['pending', 'rejected']) && !$contract->isInternal())
                                                             <button type="button" class="btn btn-xs btn-success py-0.5 px-1.5 btn-whatsapp-notify" data-id="{{ $doc->id }}" data-type="document" title="Cobrar Envio via WhatsApp">
                                                                 <i class="fa-brands fa-whatsapp"></i> Cobrar
                                                             </button>
@@ -819,6 +842,55 @@
         </div>
     @endif
 
+    <!-- 5. Modal: Registrar Histórico Manual (Gestor) -->
+    @if(!auth()->user()->isFornecedor())
+        <div class="modal fade" id="logHistoryModal" tabindex="-1" aria-labelledby="logHistoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="{{ route('contracts.history.store', $contract) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="logHistoryModalLabel">
+                                <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Registrar Evento no Histórico
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="fs-7 text-muted">Adicione uma nota, decisão ou marco diretamente na linha do tempo do contrato.</p>
+                            
+                            <!-- Tipo de Evento -->
+                            <div class="mb-3">
+                                <label for="action_type" class="form-label fw-bold">Tipo de Evento:</label>
+                                <select name="action_type" id="action_type" class="form-select" required>
+                                    <option value="manual_note">Nota / Observação</option>
+                                    <option value="decision">Decisão Administrativa</option>
+                                    <option value="milestone">Marco / Entrega</option>
+                                    <option value="communication">Comunicação Oficial</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Título -->
+                            <div class="mb-3">
+                                <label for="history_title" class="form-label fw-bold">Título / Assunto:</label>
+                                <input type="text" name="title" id="history_title" class="form-control" placeholder="Ex: Reunião de alinhamento com gestor" required>
+                            </div>
+                            
+                            <!-- Descrição -->
+                            <div class="mb-3">
+                                <label for="history_description" class="form-label fw-bold">Descrição / Detalhes:</label>
+                                <textarea name="description" id="history_description" rows="4" class="form-control" placeholder="Descreva os detalhes importantes sobre este evento..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-1"></i> Registrar Evento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
 @endsection
 
 @push('scripts')
@@ -940,7 +1012,7 @@
     </script>
 @endpush
 
-@if($contract->provider)
+@if($contract->provider && !$contract->isInternal())
 <!-- MODAL DE SELEÇÃO DE CONTATO WHATSAPP -->
 <div class="modal fade" id="whatsappNotifyModal" tabindex="-1" aria-labelledby="whatsappNotifyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

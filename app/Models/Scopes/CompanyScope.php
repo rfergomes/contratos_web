@@ -35,9 +35,10 @@ class CompanyScope implements Scope
                         $builder->where($model->getTable().'.company_id', $user->company_id);
                     }
                 } elseif ($user->isFornecedor()) {
-                    // Filtra pelo provider_id se for um fornecedor
+                    // Filtra pelo provider_id se for um fornecedor e apenas externos
                     if ($model->getTable() === 'contracts') {
-                        $builder->where($model->getTable().'.provider_id', $user->provider_id);
+                        $builder->where($model->getTable().'.provider_id', $user->provider_id)
+                            ->where($model->getTable().'.management_type', 'external');
                     }
                 }
             }

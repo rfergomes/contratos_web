@@ -86,7 +86,7 @@ class DashboardAlertsTest extends TestCase
 
         $response = $this->get(route('dashboard'));
         $response->assertStatus(200);
-        $response->assertSee('Empresas Contratantes');
+        $response->assertSee('Empresas');
     }
 
     /**

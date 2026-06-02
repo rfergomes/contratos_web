@@ -36,6 +36,7 @@ class Contract extends Model
         'alert_days',
         'status',
         'signature_validated',
+        'management_type',
     ];
 
     protected $casts = [
@@ -134,5 +135,21 @@ class Contract extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(ContractHistory::class)->orderBy('created_at', 'asc');
+    }
+
+    /**
+     * Verifica se o contrato é de controle interno.
+     */
+    public function isInternal(): bool
+    {
+        return $this->management_type === 'internal';
+    }
+
+    /**
+     * Verifica se o contrato é com fornecedor externo.
+     */
+    public function isExternal(): bool
+    {
+        return $this->management_type === 'external';
     }
 }

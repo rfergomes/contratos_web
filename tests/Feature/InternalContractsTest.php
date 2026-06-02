@@ -27,12 +27,21 @@ class InternalContractsTest extends TestCase
 
     protected Provider $providerBeta;
 
+    protected Provider $internalProviderAlpha;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->companyAlpha = Company::create(['name' => 'Alpha LTDA', 'cnpj' => '12.345.678/0001-90', 'active' => true]);
         $this->providerBeta = Provider::create(['name' => 'Beta Serviços', 'cnpj' => '11.222.333/0001-44', 'active' => true]);
+
+        // Categoria Controle Interno
+        $this->internalProviderAlpha = Provider::create([
+            'name' => 'Controle Interno - Alpha LTDA',
+            'cnpj' => null,
+            'active' => true,
+        ]);
 
         $this->superAdmin = User::create([
             'name' => 'Super Admin',
@@ -71,6 +80,7 @@ class InternalContractsTest extends TestCase
 
         $response = $this->post(route('contracts.store'), [
             'company_id' => $this->companyAlpha->id,
+            'management_type' => 'internal',
             'provider_id' => '', // Vazio / Controle Interno
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-INT-001',
@@ -86,8 +96,12 @@ class InternalContractsTest extends TestCase
 
         $this->assertDatabaseHas('contracts', [
             'contract_number' => 'CTR-INT-001',
-            'provider_id' => null,
+            'management_type' => 'internal',
         ]);
+
+        $contract = Contract::where('contract_number', 'CTR-INT-001')->first();
+        $this->assertNotNull($contract->provider_id);
+        $this->assertEquals($this->internalProviderAlpha->id, $contract->provider_id);
     }
 
     /**
@@ -97,7 +111,8 @@ class InternalContractsTest extends TestCase
     {
         $contract = Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null, // Controle Interno
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-INT-002',
             'title' => 'Contrato Interno de Telefonia',
@@ -112,7 +127,7 @@ class InternalContractsTest extends TestCase
         $response = $this->get(route('contracts.show', $contract));
         $response->assertStatus(200);
         $response->assertSee('Controle Interno');
-        $response->assertSee('Sem fornecedor atribuído');
+        $response->assertSee('Uso Interno');
     }
 
     /**
@@ -122,7 +137,8 @@ class InternalContractsTest extends TestCase
     {
         $contract = Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null, // Controle Interno
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-INT-003',
             'title' => 'Contrato Interno Telecom',
@@ -155,7 +171,8 @@ class InternalContractsTest extends TestCase
     {
         $contract = Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null, // Controle Interno
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-INT-004',
             'title' => 'Contrato Interno Limpeza',
@@ -191,7 +208,8 @@ class InternalContractsTest extends TestCase
     {
         $contract = Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null, // Controle Interno
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-INT-005',
             'title' => 'Contrato Interno Segurança',
@@ -214,8 +232,8 @@ class InternalContractsTest extends TestCase
             'status' => 'pending',
         ]);
 
-        // Como o contrato é interno (provider_id = null), nenhum alerta de nova solicitação
-        // deve ser disparado, pois não há fornecedor. E não deve alertar gestores/admins por engano.
+        // Como o contrato é interno (management_type = internal), nenhum alerta de nova solicitação
+        // deve ser disparado, pois não há fornecedor.
         $this->assertEquals(0, Alert::count());
     }
 
@@ -227,7 +245,8 @@ class InternalContractsTest extends TestCase
         // Contrato Interno
         Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null,
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-LIST-INT',
             'title' => 'Contrato Interno Telecom',
@@ -241,6 +260,7 @@ class InternalContractsTest extends TestCase
         Contract::create([
             'company_id' => $this->companyAlpha->id,
             'provider_id' => $this->providerBeta->id,
+            'management_type' => 'external',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-LIST-PROV',
             'title' => 'Contrato de Fornecimento',
@@ -270,6 +290,7 @@ class InternalContractsTest extends TestCase
         Contract::create([
             'company_id' => $this->companyAlpha->id,
             'provider_id' => $otherProvider->id,
+            'management_type' => 'external',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-LIST-GAMA',
             'title' => 'Contrato Gama Tech',
@@ -282,7 +303,8 @@ class InternalContractsTest extends TestCase
         // Contrato Interno
         Contract::create([
             'company_id' => $this->companyAlpha->id,
-            'provider_id' => null,
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-LIST-INT',
             'title' => 'Contrato Interno Telecom',
@@ -296,6 +318,7 @@ class InternalContractsTest extends TestCase
         Contract::create([
             'company_id' => $this->companyAlpha->id,
             'provider_id' => $this->providerBeta->id,
+            'management_type' => 'external',
             'responsible_id' => $this->gestorAlpha->id,
             'contract_number' => 'CTR-LIST-BETA',
             'title' => 'Contrato Beta Telecom',
@@ -312,5 +335,101 @@ class InternalContractsTest extends TestCase
         $response->assertSee('CTR-LIST-BETA');
         $response->assertDontSee('CTR-LIST-INT');
         $response->assertDontSee('CTR-LIST-GAMA');
+    }
+
+    /**
+     * Teste: Contratos internos rejeitam a abertura de solicitações.
+     */
+    public function test_internal_contract_blocks_request_creation(): void
+    {
+        $contract = Contract::create([
+            'company_id' => $this->companyAlpha->id,
+            'provider_id' => $this->internalProviderAlpha->id,
+            'management_type' => 'internal',
+            'responsible_id' => $this->gestorAlpha->id,
+            'contract_number' => 'CTR-INT-LIMIT',
+            'title' => 'Contrato Interno Limitado',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'alert_days' => 15,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($this->gestorAlpha);
+
+        $response = $this->post(route('contracts.requests.store', $contract), [
+            'type' => 'clarification',
+            'title' => 'Tentativa de Solicitação',
+            'description' => 'Isso não deve ser aceito.',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    /**
+     * Teste: Gestor pode registrar evento de histórico manual.
+     */
+    public function test_gestor_can_log_manual_history_entry(): void
+    {
+        $contract = Contract::create([
+            'company_id' => $this->companyAlpha->id,
+            'provider_id' => $this->providerBeta->id,
+            'management_type' => 'external',
+            'responsible_id' => $this->gestorAlpha->id,
+            'contract_number' => 'CTR-HIST-001',
+            'title' => 'Contrato com Histórico',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'alert_days' => 15,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($this->gestorAlpha);
+
+        $response = $this->post(route('contracts.history.store', $contract), [
+            'title' => 'Reunião Realizada',
+            'description' => 'Alinhamento geral sobre a entrega do próximo lote.',
+            'action_type' => 'communication',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('contract_histories', [
+            'contract_id' => $contract->id,
+            'action' => 'communication',
+            'title' => 'Reunião Realizada',
+            'description' => 'Alinhamento geral sobre a entrega do próximo lote.',
+            'user_id' => $this->gestorAlpha->id,
+        ]);
+    }
+
+    /**
+     * Teste: Fornecedor não pode registrar evento no histórico.
+     */
+    public function test_fornecedor_cannot_log_manual_history(): void
+    {
+        $contract = Contract::create([
+            'company_id' => $this->companyAlpha->id,
+            'provider_id' => $this->providerBeta->id,
+            'management_type' => 'external',
+            'responsible_id' => $this->gestorAlpha->id,
+            'contract_number' => 'CTR-HIST-002',
+            'title' => 'Contrato com Histórico Fornecedor',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'alert_days' => 15,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($this->fornecedorBeta);
+
+        $response = $this->post(route('contracts.history.store', $contract), [
+            'title' => 'Tentativa de Fornecedor',
+            'description' => 'Não deve registrar.',
+            'action_type' => 'manual_note',
+        ]);
+
+        $response->assertStatus(403);
     }
 }

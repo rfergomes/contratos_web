@@ -32,128 +32,163 @@
         @if(auth()->user()->isSuperAdmin())
             <!-- Widgets para Super Admin -->
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-primary mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-primary">
                     <div class="inner">
                         <h3>{{ $stats['companies'] }}</h3>
-                        <p>Empresas Contratantes</p>
+                        <p>Empresas</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M3.75 3a.75.75 0 00-.75.75v.75h16.5v-.75A.75.75 0 0018.75 3H3.75zM3 7.5v11.25c0 .414.336.75.75.75h14.5A.75.75 0 0019 18.75V7.5H3zm5.25 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zm0 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5H9a.75.75 0 01-.75-.75zM6.75 16.5a.75.75 0 100-1.5.75.75 0 000 1.5zm.75-4.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6 4.5a.75.75 0 100-1.5.75.75 0 000 1.5zm.75-4.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+                    </svg>
+                    <a href="{{ route('companies.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Empresas <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-success">
                     <div class="inner">
                         <h3>{{ $stats['providers'] }}</h3>
                         <p>Fornecedores Ativos</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-handshake"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>
+                    </svg>
+                    <a href="{{ route('providers.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Fornecedores <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
+                <div class="small-box text-bg-warning">
                     <div class="inner">
                         <h3>{{ $stats['contracts'] }}</h3>
                         <p>Contratos Cadastrados</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-file-contract"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/>
+                        <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Contratos <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-danger">
                     <div class="inner">
                         <h3>{{ $stats['documents'] }}</h3>
                         <p>Documentos Exigidos</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-check-double"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Detalhes <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
         @elseif(auth()->user()->isGestor())
             <!-- Widgets para Gestor da Empresa -->
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-info mb-4 p-3 shadow-sm text-white border-0">
+                <div class="small-box text-bg-info">
                     <div class="inner">
                         <h3>{{ $stats['active_contracts'] }}</h3>
                         <p>Contratos Ativos</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-file-signature"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H8.25z" clip-rule="evenodd"/>
+                        <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Contratos <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
+                <div class="small-box text-bg-warning">
                     <div class="inner">
                         <h3>{{ $stats['submitted_documents'] }}</h3>
                         <p>Documentos em Análise</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-hourglass-half"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Pendências <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-danger">
                     <div class="inner">
                         <h3>{{ $stats['pending_documents'] }}</h3>
                         <p>Documentos Pendentes</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Pendentes <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-success">
                     <div class="inner">
                         <h3>{{ $stats['approved_documents'] }}</h3>
                         <p>Documentos Aprovados</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Aprovados <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
         @else
             <!-- Widgets para Fornecedor -->
             <div class="col-lg-4 col-12">
-                <div class="small-box card text-bg-danger mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-danger">
                     <div class="inner">
                         <h3>{{ $stats['pending_obligations'] }}</h3>
                         <p>Obrigações Pendentes</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Obrigações <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-4 col-6">
-                <div class="small-box card text-bg-warning mb-4 p-3 shadow-sm text-white border-0">
+                <div class="small-box text-bg-warning">
                     <div class="inner">
                         <h3>{{ $stats['submitted_documents'] }}</h3>
                         <p>Enviados em Análise</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Enviados <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
             <div class="col-lg-4 col-6">
-                <div class="small-box card text-bg-success mb-4 p-3 shadow-sm border-0">
+                <div class="small-box text-bg-success">
                     <div class="inner">
                         <h3>{{ $stats['compliant_documents'] }}</h3>
                         <p>Documentos em Conformidade</p>
                     </div>
-                    <div class="icon fs-1 opacity-25 position-absolute end-0 bottom-0 me-3">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
+                    <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd"/>
+                    </svg>
+                    <a href="{{ route('contracts.index') }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                        Ver Conformes <i class="bi bi-arrow-right-short"></i>
+                    </a>
                 </div>
             </div>
         @endif
