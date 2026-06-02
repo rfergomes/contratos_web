@@ -160,8 +160,8 @@ class DatabaseSeeder extends Seeder
 
         // Super Admin (Sem empresa vinculada, visualiza tudo)
         User::create([
-            'name' => 'Administrador Global',
-            'email' => 'admin@contratos.local',
+            'name' => 'Rodrigo Lima',
+            'email' => 'rfergomes@gmail.com',
             'password' => Hash::make('password'),
             'role' => 'super_admin',
             'active' => true,
