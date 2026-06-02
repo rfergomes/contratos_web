@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\DocumentScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,10 +16,10 @@ class ContractRequest extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new \App\Models\Scopes\DocumentScope);
+        static::addGlobalScope(new DocumentScope);
 
         static::created(function ($request) {
-            \App\Models\Alert::createForNewRequest($request);
+            Alert::createForNewRequest($request);
         });
     }
 

@@ -79,6 +79,14 @@
                                                             data-document="{{ $doc->documentType->name }}">
                                                         <i class="fa-solid fa-xmark me-1"></i> Recusar
                                                     </button>
+
+                                                    <!-- Botão de Histórico -->
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-open-audit"
+                                                            data-id="{{ $doc->id }}"
+                                                            data-url="{{ route('ged.audit', $doc) }}"
+                                                            data-document="{{ $doc->documentType->name }}">
+                                                        <i class="fa-solid fa-clock-rotate-left me-1"></i> Histórico
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -117,6 +125,51 @@
                         <button type="submit" class="btn btn-danger">Confirmar Recusa</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Histórico de Auditoria -->
+    <div class="modal fade" id="auditModal" tabindex="-1" aria-labelledby="auditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="auditModalLabel">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>
+                        Histórico de Auditoria: <span id="modal-audit-doc-name" class="text-secondary"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="audit-loading" class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="text-muted mt-2 mb-0 fs-7">Carregando histórico...</p>
+                    </div>
+                    <div id="audit-empty" class="text-center p-4 d-none">
+                        <i class="fa-solid fa-circle-info fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0 fs-7">Nenhum registro de auditoria encontrado para este documento.</p>
+                    </div>
+                    <div class="table-responsive d-none" id="audit-table-container">
+                        <table class="table table-hover align-middle mb-0 fs-7">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Usuário</th>
+                                    <th>Ação</th>
+                                    <th>Metadados / Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-log-rows">
+                                <!-- Preenchido dinamicamente via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -168,6 +221,83 @@
                             form.submit();
                         }
                     });
+                });
+            });
+
+            // Inicializar Modal de Auditoria e requisição AJAX
+            const auditModalElement = document.getElementById('auditModal');
+            const auditModal = new bootstrap.Modal(auditModalElement);
+            const modalAuditDocName = document.getElementById('modal-audit-doc-name');
+            const auditLoading = document.getElementById('audit-loading');
+            const auditEmpty = document.getElementById('audit-empty');
+            const auditTableContainer = document.getElementById('audit-table-container');
+            const auditLogRows = document.getElementById('audit-log-rows');
+
+            document.querySelectorAll('.btn-open-audit').forEach(button => {
+                button.addEventListener('click', function() {
+                    const actionUrl = this.getAttribute('data-url');
+                    const docName = this.getAttribute('data-document');
+
+                    modalAuditDocName.textContent = docName;
+                    
+                    // Exibir loading e ocultar tabelas/avisos
+                    auditLoading.classList.remove('d-none');
+                    auditEmpty.classList.add('d-none');
+                    auditTableContainer.classList.add('d-none');
+                    auditLogRows.innerHTML = '';
+
+                    // Exibir modal
+                    auditModal.show();
+
+                    // Requisição assíncrona
+                    fetch(actionUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro ao buscar auditorias');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            auditLoading.classList.add('d-none');
+                            if (data.length === 0) {
+                                auditEmpty.classList.remove('d-none');
+                            } else {
+                                data.forEach(log => {
+                                    const date = new Date(log.created_at);
+                                    const formattedDate = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                                    
+                                    let actionBadge = '';
+                                    if (log.action === 'approved') {
+                                        actionBadge = '<span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Aprovado</span>';
+                                    } else if (log.action === 'rejected') {
+                                        actionBadge = '<span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>Recusado</span>';
+                                    } else {
+                                        actionBadge = `<span class="badge bg-secondary">${log.action}</span>`;
+                                    }
+
+                                    let metaHtml = `<div class="fs-8 text-muted"><strong>IP:</strong> ${log.ip || 'N/D'}</div>`;
+                                    if (log.reason) {
+                                        metaHtml += `<div class="mt-1 text-danger"><strong>Motivo:</strong> ${log.reason}</div>`;
+                                    }
+
+                                    const row = `
+                                        <tr>
+                                            <td>${formattedDate}</td>
+                                            <td><span class="fw-bold">${log.user_name}</span></td>
+                                            <td>${actionBadge}</td>
+                                            <td>${metaHtml}</td>
+                                        </tr>
+                                    `;
+                                    auditLogRows.insertAdjacentHTML('beforeend', row);
+                                });
+                                auditTableContainer.classList.remove('d-none');
+                            }
+                        })
+                        .catch(error => {
+                            auditLoading.classList.add('d-none');
+                            auditLogRows.innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3"><i class="fa-solid fa-triangle-exclamation me-1"></i>Erro ao carregar o histórico de auditoria.</td></tr>`;
+                            auditTableContainer.classList.remove('d-none');
+                        });
                 });
             });
         });

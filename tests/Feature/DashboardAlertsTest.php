@@ -18,10 +18,15 @@ class DashboardAlertsTest extends TestCase
     use RefreshDatabase;
 
     protected User $superAdmin;
+
     protected User $gestorAlpha;
+
     protected User $fornecedorBeta;
+
     protected Company $companyAlpha;
+
     protected Provider $providerBeta;
+
     protected Contract $contract;
 
     protected function setUp(): void
@@ -237,7 +242,7 @@ class DashboardAlertsTest extends TestCase
 
         $this->actingAs($this->gestorAlpha);
         $response = $this->get(route('alerts.go', $alert));
-        
+
         $response->assertRedirect('http://localhost:8000/contracts/1');
         $this->assertNotNull($alert->fresh()->read_at);
     }

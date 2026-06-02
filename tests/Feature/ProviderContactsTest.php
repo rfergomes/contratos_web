@@ -14,9 +14,13 @@ class ProviderContactsTest extends TestCase
     use RefreshDatabase;
 
     protected User $superAdmin;
+
     protected User $gestorAlpha;
+
     protected User $fornecedorBeta;
+
     protected Company $companyAlpha;
+
     protected Provider $providerBeta;
 
     protected function setUp(): void

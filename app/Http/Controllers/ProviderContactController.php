@@ -16,6 +16,7 @@ class ProviderContactController extends Controller
         abort_if(auth()->user()->isFornecedor(), 403, 'Acesso não autorizado.');
 
         $contacts = $provider->contacts()->orderBy('is_main', 'desc')->orderBy('name', 'asc')->get();
+
         return response()->json($contacts);
     }
 
@@ -43,7 +44,7 @@ class ProviderContactController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Contato adicionado com sucesso!',
-            'contact' => $contact
+            'contact' => $contact,
         ]);
     }
 
@@ -71,7 +72,7 @@ class ProviderContactController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Contato atualizado com sucesso!',
-            'contact' => $contact
+            'contact' => $contact,
         ]);
     }
 
@@ -86,7 +87,7 @@ class ProviderContactController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Contato removido com sucesso!'
+            'message' => 'Contato removido com sucesso!',
         ]);
     }
 
@@ -98,12 +99,12 @@ class ProviderContactController extends Controller
         abort_if(auth()->user()->isFornecedor(), 403, 'Acesso não autorizado.');
 
         $contact->update([
-            'is_main' => true // O model se encarrega de desmarcar os outros no event saving
+            'is_main' => true, // O model se encarrega de desmarcar os outros no event saving
         ]);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Contato marcado como principal com sucesso!'
+            'message' => 'Contato marcado como principal com sucesso!',
         ]);
     }
 }

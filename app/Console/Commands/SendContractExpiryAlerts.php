@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\ContractExpiryAlert;
 use App\Models\Contract;
 use App\Models\User;
-use App\Mail\ContractExpiryAlert;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -39,7 +39,7 @@ class SendContractExpiryAlerts extends Command
         $alertsSent = 0;
 
         foreach ($contracts as $contract) {
-            if (!$contract->end_date) {
+            if (! $contract->end_date) {
                 continue;
             }
 
@@ -73,6 +73,7 @@ class SendContractExpiryAlerts extends Command
         }
 
         $this->info("Disparados {$alertsSent} alertas de vencimento de contratos.");
+
         return Command::SUCCESS;
     }
 }

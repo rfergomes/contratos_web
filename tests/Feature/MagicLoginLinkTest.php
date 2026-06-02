@@ -19,12 +19,19 @@ class MagicLoginLinkTest extends TestCase
     use RefreshDatabase;
 
     protected User $superAdmin;
+
     protected User $gestorAlpha;
+
     protected User $fornecedorBeta;
+
     protected Company $companyAlpha;
+
     protected Provider $providerBeta;
+
     protected Contract $contract;
+
     protected ContractRequest $contractRequest;
+
     protected ContractDocument $contractDocument;
 
     protected function setUp(): void
@@ -191,7 +198,7 @@ class MagicLoginLinkTest extends TestCase
         $responseGet = $this->get(route('public.access', $token->token));
         $responseGet->assertStatus(200);
         $responseGet->assertViewIs('auth.magic_login');
-        
+
         // Não deve ter logado ainda
         $this->assertFalse(Auth::check());
         // Token não deve ter sido apagado
@@ -199,13 +206,13 @@ class MagicLoginLinkTest extends TestCase
 
         // 2. POST: Efetua o login e consome o token
         $responsePost = $this->post(route('public.access.authenticate', $token->token));
-        
+
         // Deve autenticar o fornecedorBeta
         $this->assertTrue(Auth::check());
         $this->assertEquals($this->fornecedorBeta->id, Auth::id());
 
         // Deve redirecionar para a página do contrato com a âncora do timeline
-        $responsePost->assertRedirect(route('contracts.show', $this->contract->id) . '#timeline');
+        $responsePost->assertRedirect(route('contracts.show', $this->contract->id).'#timeline');
 
         // Deve deletar o token para uso único (Single-Use)
         $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token->id]);

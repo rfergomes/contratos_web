@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContractDocument;
+use App\Models\ContractHistory;
+use App\Models\GedAuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -59,7 +61,7 @@ class GedController extends Controller
             }
 
             // Salva na pasta privada do storage (não pública)
-            $path = $request->file('file')->store('private/documents/contracts/' . $document->contract_id);
+            $path = $request->file('file')->store('private/documents/contracts/'.$document->contract_id);
 
             $document->update([
                 'file_path' => $path,
@@ -71,7 +73,7 @@ class GedController extends Controller
             ]);
 
             // Registrar histórico do contrato
-            \App\Models\ContractHistory::log($document->contract_id, 'document_submitted', 'Documento Enviado', 'O documento "' . $document->documentType->name . '" foi enviado por ' . $user->name);
+            ContractHistory::log($document->contract_id, 'document_submitted', 'Documento Enviado', 'O documento "'.$document->documentType->name.'" foi enviado por '.$user->name);
 
             return back()->with('success', 'Documento enviado com sucesso! Aguarde a análise do gestor.');
         }
@@ -100,7 +102,7 @@ class GedController extends Controller
             $hasAccess = false;
         }
 
-        if (!$hasAccess || !$document->file_path || !Storage::exists($document->file_path)) {
+        if (! $hasAccess || ! $document->file_path || ! Storage::exists($document->file_path)) {
             abort(403, 'Documento não disponível ou acesso negado.');
         }
 
@@ -130,8 +132,19 @@ class GedController extends Controller
             'rejection_reason' => null,
         ]);
 
+        // Registrar auditoria do GED
+        GedAuditLog::create([
+            'contract_document_id' => $document->id,
+            'user_id' => $user->id,
+            'action' => 'approved',
+            'metadata' => [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ],
+        ]);
+
         // Registrar histórico do contrato
-        \App\Models\ContractHistory::log($document->contract_id, 'document_approved', 'Documento Aprovado', 'O documento "' . $document->documentType->name . '" foi aprovado por ' . $user->name);
+        ContractHistory::log($document->contract_id, 'document_approved', 'Documento Aprovado', 'O documento "'.$document->documentType->name.'" foi aprovado por '.$user->name);
 
         return back()->with('success', 'Documento aprovado com sucesso!');
     }
@@ -163,9 +176,62 @@ class GedController extends Controller
             'approved_at' => null,
         ]);
 
+        // Registrar auditoria do GED
+        GedAuditLog::create([
+            'contract_document_id' => $document->id,
+            'user_id' => $user->id,
+            'action' => 'rejected',
+            'metadata' => [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'reason' => $request->rejection_reason,
+            ],
+        ]);
+
         // Registrar histórico do contrato
-        \App\Models\ContractHistory::log($document->contract_id, 'document_rejected', 'Documento Recusado', 'O documento "' . $document->documentType->name . '" foi recusado por ' . $user->name . '. Motivo: ' . $request->rejection_reason);
+        ContractHistory::log($document->contract_id, 'document_rejected', 'Documento Recusado', 'O documento "'.$document->documentType->name.'" foi recusado por '.$user->name.'. Motivo: '.$request->rejection_reason);
 
         return back()->with('warning', 'Documento recusado. O fornecedor foi notificado sobre a pendência.');
+    }
+
+    /**
+     * Retorna o histórico de auditoria de um documento do GED.
+     */
+    public function audit(ContractDocument $document)
+    {
+        $user = Auth::user();
+
+        // Regra de Acesso de Segurança (ACL)
+        if ($user->isSuperAdmin()) {
+            $hasAccess = true;
+        } elseif ($user->isGestor() && $document->contract->company_id === $user->company_id) {
+            $hasAccess = true;
+        } elseif ($user->isFornecedor() && $document->contract->provider_id === $user->provider_id) {
+            $hasAccess = true;
+        } else {
+            $hasAccess = false;
+        }
+
+        if (! $hasAccess) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        $logs = $document->gedAuditLogs()
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'user_name' => $log->user ? $log->user->name : 'Sistema/Usuário Deletado',
+                    'action' => $log->action,
+                    'ip' => $log->metadata['ip'] ?? null,
+                    'user_agent' => $log->metadata['user_agent'] ?? null,
+                    'reason' => $log->metadata['reason'] ?? null,
+                    'created_at' => $log->created_at->toIso8601String(),
+                ];
+            });
+
+        return response()->json($logs);
     }
 }

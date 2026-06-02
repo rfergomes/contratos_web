@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
-use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -69,7 +68,7 @@ class UserManagementTest extends TestCase
 
         // Deve conter os usuários da empresa Alpha
         $response->assertSee('Usuario Interno Alpha');
-        
+
         // NÃO deve conter o usuário da empresa Omega
         $response->assertDontSee('Usuario Omega');
     }

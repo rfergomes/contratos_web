@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
+use App\Models\Contract;
+use App\Models\ContractDocument;
 use App\Models\DocumentType;
 use App\Models\Provider;
 use App\Models\User;
-use App\Models\Contract;
-use App\Models\ContractDocument;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -83,7 +83,7 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Documento constitutivo da empresa fornecedora.',
                 'periodicity' => 'once',
                 'required' => true,
-            ]
+            ],
         ];
 
         foreach ($docTypes as $doc) {
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // 4. Criar Usuários com Perfis Distintos
-        
+
         // Super Admin (Sem empresa vinculada, visualiza tudo)
         User::create([
             'name' => 'Administrador Global',
@@ -160,7 +160,7 @@ class DatabaseSeeder extends Seeder
         $types = DocumentType::all();
 
         // Para o Contrato 1 (Fornecedor Beta):
-        
+
         // CRF do FGTS - Pendente (Atrasado)
         ContractDocument::create([
             'contract_id' => $contract1->id,
@@ -171,7 +171,7 @@ class DatabaseSeeder extends Seeder
 
         // INSS/RFB - Enviado (Aguardando Análise)
         // Criar uma pasta e arquivo dummy para teste de download
-        $dummyPath = 'private/documents/contracts/' . $contract1->id . '/receita_federal.pdf';
+        $dummyPath = 'private/documents/contracts/'.$contract1->id.'/receita_federal.pdf';
         Storage::put($dummyPath, 'Dummy PDF content for testing');
 
         ContractDocument::create([
@@ -188,7 +188,7 @@ class DatabaseSeeder extends Seeder
         ContractDocument::create([
             'contract_id' => $contract1->id,
             'document_type_id' => $types->where('name', 'Certidão Negativa de Débitos Trabalhistas (CNDT)')->first()->id,
-            'file_path' => 'private/documents/contracts/' . $contract1->id . '/cndt_velha.pdf',
+            'file_path' => 'private/documents/contracts/'.$contract1->id.'/cndt_velha.pdf',
             'original_name' => 'cndt_ano_passado.pdf',
             'due_date' => now()->addDays(20),
             'status' => 'rejected',
@@ -201,7 +201,7 @@ class DatabaseSeeder extends Seeder
         ContractDocument::create([
             'contract_id' => $contract1->id,
             'document_type_id' => $types->where('name', 'Contrato Social ou Estatuto Atualizado')->first()->id,
-            'file_path' => 'private/documents/contracts/' . $contract1->id . '/contrato_social.pdf',
+            'file_path' => 'private/documents/contracts/'.$contract1->id.'/contrato_social.pdf',
             'original_name' => 'contrato_social_assinado.pdf',
             'due_date' => now()->subDays(10),
             'status' => 'approved',

@@ -12,6 +12,7 @@ class DocumentTypeTest extends TestCase
     use RefreshDatabase;
 
     protected User $superAdmin;
+
     protected User $gestor;
 
     protected function setUp(): void
