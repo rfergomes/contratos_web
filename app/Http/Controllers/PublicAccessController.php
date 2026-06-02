@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contract;
 use App\Models\ContractDocument;
 use App\Models\ContractHistory;
 use App\Models\ContractRequest;
@@ -26,14 +27,20 @@ class PublicAccessController extends Controller
             return redirect()->route('login')->with('error', 'O link de acesso expirou ou é inválido.');
         }
 
-        $item = $accessToken->tokenable;
+        // Busca o recurso sem escopos globais para permitir visualização mesmo se outro fornecedor estiver logado
+        $item = null;
+        if ($accessToken->tokenable_type) {
+            $item = $accessToken->tokenable_type::withoutGlobalScopes()->find($accessToken->tokenable_id);
+        }
+
         if (! $item) {
             $accessToken->delete();
 
             return redirect()->route('login')->with('error', 'O recurso associado a este link não existe mais.');
         }
 
-        $contract = $item->contract;
+        // Busca o contrato sem escopos globais
+        $contract = Contract::withoutGlobalScopes()->find($item->contract_id);
         if (! $contract) {
             $accessToken->delete();
 
@@ -68,19 +75,31 @@ class PublicAccessController extends Controller
                 $accessToken->delete(); // Limpa token expirado
             }
 
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'O link de acesso expirou ou é inválido.');
         }
 
-        $item = $accessToken->tokenable;
+        // Busca o recurso sem escopos globais para permitir a validação e posterior troca de sessão
+        $item = null;
+        if ($accessToken->tokenable_type) {
+            $item = $accessToken->tokenable_type::withoutGlobalScopes()->find($accessToken->tokenable_id);
+        }
+
         if (! $item) {
             $accessToken->delete();
+
+            $this->clearSession();
 
             return redirect()->route('login')->with('error', 'O recurso associado a este link não existe mais.');
         }
 
-        $contract = $item->contract;
+        // Busca o contrato sem escopos globais
+        $contract = Contract::withoutGlobalScopes()->find($item->contract_id);
         if (! $contract) {
             $accessToken->delete();
+
+            $this->clearSession();
 
             return redirect()->route('login')->with('error', 'Contrato não encontrado para este recurso.');
         }
@@ -93,7 +112,14 @@ class PublicAccessController extends Controller
             ->first();
 
         if (! $user) {
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'Nenhum usuário ativo de fornecedor configurado para este contrato.');
+        }
+
+        // Se outro usuário estiver logado, efetua o logout e invalida a sessão antiga antes de logar o novo
+        if (Auth::check() && Auth::id() !== $user->id) {
+            $this->clearSession();
         }
 
         // Login automático do usuário
@@ -117,6 +143,18 @@ class PublicAccessController extends Controller
         }
 
         return redirect()->route('dashboard');
+    }
+
+    /**
+     * Limpa a sessão ativa se houver algum usuário logado.
+     */
+    protected function clearSession(): void
+    {
+        if (Auth::check()) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
     }
 
     /**

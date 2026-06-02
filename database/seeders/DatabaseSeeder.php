@@ -133,6 +133,16 @@ class DatabaseSeeder extends Seeder
             'active' => true,
         ]);
 
+        // Fornecedor Gama (Acesso ao painel do fornecedor Gama)
+        User::create([
+            'name' => 'Preposto Fornecedor Gama',
+            'email' => 'fornecedor@gama.local',
+            'password' => Hash::make('password'),
+            'role' => 'fornecedor',
+            'provider_id' => $providerGama->id,
+            'active' => true,
+        ]);
+
         // 5. Criar Contratos de Teste
         $contract1 = Contract::create([
             'company_id' => $companyAlpha->id,

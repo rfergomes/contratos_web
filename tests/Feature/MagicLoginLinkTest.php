@@ -248,4 +248,116 @@ class MagicLoginLinkTest extends TestCase
         // Deve deletar o token
         $this->assertDatabaseMissing('temporary_access_tokens', ['id' => $token->id]);
     }
+
+    /**
+     * Teste: Se um usuário já estiver logado, mas o link falhar por ausência de usuário ativo,
+     * a sessão atual é destruída e redirecionada para a tela de login.
+     */
+    public function test_magic_link_authentication_failure_destroys_session_and_redirects_to_login(): void
+    {
+        // 1. Loga como Fornecedor Beta
+        $this->actingAs($this->fornecedorBeta);
+        $this->assertTrue(Auth::check());
+
+        // 2. Cria outro fornecedor sem nenhum usuário cadastrado
+        $providerGama = Provider::create([
+            'name' => 'Gama Segurança',
+            'cnpj' => '22.333.444/0001-55',
+            'active' => true,
+        ]);
+
+        $contractGama = Contract::create([
+            'company_id' => $this->companyAlpha->id,
+            'provider_id' => $providerGama->id,
+            'contract_number' => 'CTR-888',
+            'title' => 'Segurança Gama',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'alert_days' => 30,
+            'status' => 'active',
+            'signature_validated' => true,
+            'responsible_id' => $this->gestorAlpha->id,
+        ]);
+
+        $requestGama = ContractRequest::create([
+            'contract_id' => $contractGama->id,
+            'sender_type' => 'company',
+            'user_id' => $this->gestorAlpha->id,
+            'type' => 'amendment',
+            'title' => 'Pedido Gama',
+            'description' => 'Ajuste.',
+            'status' => 'pending',
+        ]);
+
+        $token = TemporaryAccessToken::generateFor($requestGama);
+
+        // 3. Tenta autenticar (POST) via link do Gama
+        $response = $this->post(route('public.access.authenticate', $token->token));
+
+        // 4. Garante que foi deslogado e redirecionado para a tela de login
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('error', 'Nenhum usuário ativo de fornecedor configurado para este contrato.');
+        $this->assertFalse(Auth::check());
+    }
+
+    /**
+     * Teste: Se um fornecedor A estiver logado, e acessar um link mágico válido do fornecedor B,
+     * a sessão do fornecedor A é destruída e o fornecedor B é autenticado com sucesso.
+     */
+    public function test_magic_login_swaps_provider_sessions_safely(): void
+    {
+        // 1. Loga como Fornecedor Beta
+        $this->actingAs($this->fornecedorBeta);
+        $this->assertTrue(Auth::check());
+        $this->assertEquals($this->fornecedorBeta->id, Auth::id());
+
+        // 2. Cria o fornecedor Gama e um usuário ativo para ele
+        $providerGama = Provider::create([
+            'name' => 'Gama Segurança',
+            'cnpj' => '22.333.444/0001-55',
+            'active' => true,
+        ]);
+
+        $fornecedorGama = User::create([
+            'name' => 'Fornecedor Gama',
+            'email' => 'fornecedor@gama.com',
+            'password' => bcrypt('password'),
+            'role' => 'fornecedor',
+            'provider_id' => $providerGama->id,
+            'active' => true,
+        ]);
+
+        $contractGama = Contract::create([
+            'company_id' => $this->companyAlpha->id,
+            'provider_id' => $providerGama->id,
+            'contract_number' => 'CTR-888',
+            'title' => 'Segurança Gama',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'alert_days' => 30,
+            'status' => 'active',
+            'signature_validated' => true,
+            'responsible_id' => $this->gestorAlpha->id,
+        ]);
+
+        $requestGama = ContractRequest::create([
+            'contract_id' => $contractGama->id,
+            'sender_type' => 'company',
+            'user_id' => $this->gestorAlpha->id,
+            'type' => 'amendment',
+            'title' => 'Pedido Gama',
+            'description' => 'Ajuste.',
+            'status' => 'pending',
+        ]);
+
+        $token = TemporaryAccessToken::generateFor($requestGama);
+
+        // 3. POST para autenticar via link do Gama
+        $response = $this->post(route('public.access.authenticate', $token->token));
+
+        // 4. Garante o redirecionamento com sucesso e que o usuário ativo agora é o Fornecedor Gama
+        $response->assertRedirect(route('contracts.show', $contractGama->id).'#timeline');
+        $this->assertTrue(Auth::check());
+        $this->assertEquals($fornecedorGama->id, Auth::id());
+    }
 }
