@@ -160,8 +160,13 @@
                         <div id="view-card-container" class="p-4 d-none">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($contracts as $contract)
+<<<<<<< HEAD
                                     <div class="col card-item" data-management-type="{{ $contract->isInternal() ? 'internal' : 'with_provider' }}">
                                         <div class="card h-100 card-secondary card-outline shadow-sm">
+=======
+                                    <div class="col card-item" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
+                                        <div class="card h-100 card-info card-outline shadow-sm">
+>>>>>>> 31e793596f59ce9ef29177b269c2af658acdb50c
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                                     <div class="d-flex align-items-center">
