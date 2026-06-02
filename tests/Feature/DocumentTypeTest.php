@@ -121,4 +121,30 @@ class DocumentTypeTest extends TestCase
 
         $this->assertTrue($docType->fresh()->required);
     }
+
+    /**
+     * Teste: Os novos tipos de documentos expandidos são populados pela migration.
+     */
+    public function test_expanded_document_types_are_seeded_by_migration(): void
+    {
+        $expectedNames = [
+            'Nota Fiscal de Serviços Eletrônica (NFS-e)',
+            'Recibo de Pagamento Autônomo (RPA)',
+            'Guia e Comprovante do Simples Nacional (DAS)',
+            'Guia e Comprovante de Tributos Federais (DARF/DARM)',
+            'Recibo de Entrega da DCTFWeb / EFD-Reinf',
+            'Recibo de Envio do eSocial',
+            'Extrato do PGDAS-D',
+            'Declaração do Simples Nacional (DEFIS)',
+            'Certidão Negativa de Débitos Estaduais (CND Estadual)',
+            'Certidão Negativa de Débitos Municipais (CND Municipal)',
+            'Folha de Pagamento e Encargos Sociais (GFIP/SEFIP/FGTS)',
+        ];
+
+        foreach ($expectedNames as $name) {
+            $this->assertDatabaseHas('document_types', [
+                'name' => $name,
+            ]);
+        }
+    }
 }
