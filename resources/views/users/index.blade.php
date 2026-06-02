@@ -32,7 +32,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body bg-transparent p-0">
+                <div class="card-body p-0">
                     @if($users->isEmpty())
                         <div class="text-center p-5">
                             <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>

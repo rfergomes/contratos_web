@@ -38,6 +38,51 @@
                     @endphp
 
                     <!-- Notifications Dropdown Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                            <i class="bi bi-bell-fill"></i>
+                            @if($navbarAlertsCount > 0)
+                                <span class="navbar-badge badge text-bg-warning">{{ $navbarAlertsCount }}</span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                            @if($navbarAlertsCount > 0)
+                                <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
+                                    {{ $navbarAlertsCount }} Alertas Não Lidos
+                                </span>
+                                <div class="dropdown-divider mb-0"></div>
+                            @endif
+                            @if($navbarAlerts->isEmpty())
+                                <div class="dropdown-item text-center text-muted py-3">
+                                    <i class="fa-solid fa-circle-check text-success mb-2 fs-4"></i>
+                                    <p class="mb-0 fs-7">Nenhuma pendência encontrada</p>
+                                </div>
+                            @else
+                                @foreach($navbarAlerts as $navAlert)
+                                    @php
+                                        $alertIcons = [
+                                            'new_request' => 'fa-envelope text-primary',
+                                            'request_deadline' => 'fa-clock text-warning',
+                                            'obligation_deadline' => 'fa-circle-exclamation text-danger',
+                                            'request_response' => 'fa-reply text-success',
+                                        ];
+                                        $alertIcon = $alertIcons[$navAlert->type] ?? 'fa-bell text-secondary';
+                                    @endphp
+                                    <a href="{{ route('alerts.go', $navAlert) }}" class="dropdown-item d-flex align-items-center py-2 border-bottom">
+                                        <i class="fa-solid {{ $alertIcon }} me-3 fs-5"></i>
+                                        <div style="white-space: normal;">
+                                            <p class="mb-0 fw-bold fs-7" style="line-height: 1.2;">{{ $navAlert->title }}</p>
+                                            <p class="mb-0 text-muted fs-8" style="line-height: 1.2;">{{ $navAlert->message }}</p>
+                                        </div>
+                                    </a>
+                                @endforeach
+                                <div class="dropdown-divider mt-0"></div>
+                                <a href="{{ route('dashboard') }}" class="dropdown-item dropdown-footer text-center text-primary py-2 fw-bold fs-7">
+                                    Ver todos os alertas no Dashboard
+                                </a>
+                            @endif
+                        </div>
+                    </li>
                     <li class="nav-item dropdown me-3 align-self-center">
                         <a class="nav-link position-relative py-1" data-bs-toggle="dropdown" href="#" aria-expanded="false">
                             <i class="fa-solid fa-bell fs-5"></i>
