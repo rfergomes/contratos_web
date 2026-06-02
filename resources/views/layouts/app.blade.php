@@ -81,52 +81,6 @@
                             @endif
                         </div>
                     </li>
-                    <li class="nav-item dropdown me-3 align-self-center">
-                        <a class="nav-link position-relative py-1" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                            <i class="fa-solid fa-bell fs-5"></i>
-                            @if($navbarAlertsCount > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 5px; margin-left: -5px;">
-                                    {{ $navbarAlertsCount }}
-                                </span>
-                            @endif
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end shadow">
-                            <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
-                                {{ $navbarAlertsCount }} Alertas Não Lidos
-                            </span>
-                            <div class="dropdown-divider mb-0"></div>
-                            
-                            @if($navbarAlerts->isEmpty())
-                                <div class="dropdown-item text-center text-muted py-3">
-                                    <i class="fa-solid fa-circle-check text-success mb-2 fs-4"></i>
-                                    <p class="mb-0 fs-7">Nenhuma pendência encontrada</p>
-                                </div>
-                            @else
-                                @foreach($navbarAlerts as $navAlert)
-                                    @php
-                                        $alertIcons = [
-                                            'new_request' => 'fa-envelope text-primary',
-                                            'request_deadline' => 'fa-clock text-warning',
-                                            'obligation_deadline' => 'fa-circle-exclamation text-danger',
-                                            'request_response' => 'fa-reply text-success',
-                                        ];
-                                        $alertIcon = $alertIcons[$navAlert->type] ?? 'fa-bell text-secondary';
-                                    @endphp
-                                    <a href="{{ route('alerts.go', $navAlert) }}" class="dropdown-item d-flex align-items-center py-2 border-bottom">
-                                        <i class="fa-solid {{ $alertIcon }} me-3 fs-5"></i>
-                                        <div style="white-space: normal;">
-                                            <p class="mb-0 fw-bold fs-7" style="line-height: 1.2;">{{ $navAlert->title }}</p>
-                                            <p class="mb-0 text-muted fs-8" style="line-height: 1.2;">{{ $navAlert->message }}</p>
-                                        </div>
-                                    </a>
-                                @endforeach
-                                <div class="dropdown-divider mt-0"></div>
-                                <a href="{{ route('dashboard') }}" class="dropdown-item dropdown-footer text-center text-primary py-2 fw-bold fs-7">
-                                    Ver todos os alertas no Dashboard
-                                </a>
-                            @endif
-                        </div>
-                    </li>
                     @if(auth()->check() && (auth()->user()->isSuperAdmin() || (auth()->user()->isGestor() && auth()->user()->companies()->count() > 1)))
                         @php
                             if (auth()->user()->isSuperAdmin()) {
@@ -181,21 +135,17 @@
                     <!-- User Dropdown Menu -->
                     <li class="nav-item dropdown user-menu">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            @if(auth()->user()->profile_photo_path)
-                                <img src="{{ asset('storage/' . auth()->user()->profile_photo_path) }}" class="rounded-circle me-1" alt="User Image" style="width: 24px; height: 24px; object-fit: cover;">
-                            @else
-                                <i class="fa-solid fa-user-circle fa-lg me-1"></i>
-                            @endif
+                            <img src="{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim(auth()->user()->email))) . '?d=mp&s=28' }}"
+                                 class="rounded-circle me-1" alt="User Image" style="width: 28px; height: 28px; object-fit: cover;"
+                                 onerror="this.onerror=null;this.src='https://www.gravatar.com/avatar/{{ md5(strtolower(trim(auth()->user()->email))) }}?d=mp&s=28';">
                             <span class="d-none d-md-inline">{{ auth()->user()->name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end shadow">
                             <!-- User image & Name -->
                             <li class="user-header text-bg-primary p-3 text-center">
-                                @if(auth()->user()->profile_photo_path)
-                                    <img src="{{ asset('storage/' . auth()->user()->profile_photo_path) }}" class="rounded-circle shadow mb-2" alt="User Image" style="width: 90px; height: 90px; object-fit: cover;">
-                                @else
-                                    <i class="fa-solid fa-user fa-3x mb-2 text-white"></i>
-                                @endif
+                                <img src="{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim(auth()->user()->email))) . '?d=mp&s=90' }}"
+                                     class="rounded-circle shadow mb-2" alt="User Image" style="width: 90px; height: 90px; object-fit: cover;"
+                                     onerror="this.onerror=null;this.src='https://www.gravatar.com/avatar/{{ md5(strtolower(trim(auth()->user()->email))) }}?d=mp&s=90';">
                                 <p>
                                     {{ auth()->user()->name }}
                                     <small class="d-block text-white-50">

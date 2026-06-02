@@ -58,7 +58,8 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=mp&s=40' }}" 
-                                                         class="rounded-circle me-2" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;">
+                                                         class="rounded-circle me-2" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover;"
+                                                         onerror="this.onerror=null;this.src='https://www.gravatar.com/avatar/{{ md5(strtolower(trim($user->email))) }}?d=mp&s=40';">
                                                     <strong>{{ $user->name }}</strong>
                                                 </div>
                                             </td>
@@ -140,7 +141,8 @@
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
                                                     <img src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=mp&s=40' }}" 
-                                                         class="rounded-circle me-3" alt="Avatar" style="width: 48px; height: 48px; object-fit: cover;">
+                                                         class="rounded-circle me-3" alt="Avatar" style="width: 48px; height: 48px; object-fit: cover;"
+                                                         onerror="this.onerror=null;this.src='https://www.gravatar.com/avatar/{{ md5(strtolower(trim($user->email))) }}?d=mp&s=40';">
                                                     <div>
                                                         <h6 class="fw-bold mb-0 text-dark">{{ $user->name }}</h6>
                                                         <small class="text-muted">ID: {{ $user->id }}</small>
