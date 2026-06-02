@@ -13,7 +13,7 @@
     
     @stack('styles')
 </head>
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary app-loaded">
     <div class="app-wrapper">
         <!-- Header / Navbar -->
         <nav class="app-header navbar navbar-expand bg-dark navbar-dark shadow-sm" data-bs-theme="dark">
