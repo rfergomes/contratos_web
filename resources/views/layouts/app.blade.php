@@ -40,18 +40,16 @@
                     <!-- Notifications Dropdown Menu -->
                     <li class="nav-item dropdown">
                         <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                            <i class="bi bi-bell-fill"></i>
+                            <i class="fa fa-solid fa-bell"></i>
                             @if($navbarAlertsCount > 0)
                                 <span class="navbar-badge badge text-bg-warning">{{ $navbarAlertsCount }}</span>
                             @endif
                         </a>
-                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                            @if($navbarAlertsCount > 0)
-                                <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
-                                    {{ $navbarAlertsCount }} Alertas Não Lidos
-                                </span>
-                                <div class="dropdown-divider mb-0"></div>
-                            @endif
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">  
+                            <span class="dropdown-item dropdown-header text-uppercase fs-7 text-secondary py-2">
+                                {{ $navbarAlertsCount }} Alertas Não Lidos
+                            </span>
+                            <div class="dropdown-divider mb-0"></div>
                             @if($navbarAlerts->isEmpty())
                                 <div class="dropdown-item text-center text-muted py-3">
                                     <i class="fa-solid fa-circle-check text-success mb-2 fs-4"></i>
