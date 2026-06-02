@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\DocumentScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContractDocument extends Model
 {
@@ -15,7 +17,7 @@ class ContractDocument extends Model
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new \App\Models\Scopes\DocumentScope);
+        static::addGlobalScope(new DocumentScope);
 
         static::saved(function ($document) {
             $contract = $document->contract()->first();
@@ -73,5 +75,13 @@ class ContractDocument extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * Relacionamento com os logs de auditoria do GED
+     */
+    public function gedAuditLogs(): HasMany
+    {
+        return $this->hasMany(GedAuditLog::class);
     }
 }

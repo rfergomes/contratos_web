@@ -3,9 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Scopes\CompanyScope;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -19,7 +21,7 @@ class User extends Authenticatable
      */
     protected static function booted(): void
     {
-        static::addGlobalScope(new \App\Models\Scopes\CompanyScope);
+        static::addGlobalScope(new CompanyScope);
     }
 
     /**
@@ -73,7 +75,7 @@ class User extends Authenticatable
     /**
      * Empresas contratantes que este usuário gerencia / tem acesso
      */
-    public function companies(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function companies(): BelongsToMany
     {
         return $this->belongsToMany(Company::class, 'company_user');
     }

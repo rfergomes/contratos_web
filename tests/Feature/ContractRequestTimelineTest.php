@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\ContractDocument;
 use App\Models\ContractRequest;
-use App\Models\ContractHistory;
 use App\Models\DocumentType;
 use App\Models\Provider;
 use App\Models\User;
@@ -20,11 +19,17 @@ class ContractRequestTimelineTest extends TestCase
     use RefreshDatabase;
 
     protected User $superAdmin;
+
     protected User $gestorAlpha;
+
     protected User $fornecedorBeta;
+
     protected Company $companyAlpha;
+
     protected Company $companyOmega;
+
     protected Provider $providerBeta;
+
     protected Contract $contract;
 
     protected function setUp(): void

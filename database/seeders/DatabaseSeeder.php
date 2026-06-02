@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
+use App\Models\Contract;
+use App\Models\ContractDocument;
 use App\Models\DocumentType;
 use App\Models\Provider;
 use App\Models\User;
-use App\Models\Contract;
-use App\Models\ContractDocument;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -83,15 +83,81 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Documento constitutivo da empresa fornecedora.',
                 'periodicity' => 'once',
                 'required' => true,
-            ]
+            ],
+            [
+                'name' => 'Nota Fiscal de Serviços Eletrônica (NFS-e)',
+                'description' => 'Documento oficial de comprovação de prestação de serviços emitida via Prefeitura municipal.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Recibo de Pagamento Autônomo (RPA)',
+                'description' => 'Utilizado para comprovação de prestação de serviços por prestador Pessoa Física.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Guia e Comprovante do Simples Nacional (DAS)',
+                'description' => 'Documento de Arrecadação do Simples Nacional com respectivo comprovante de pagamento.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Guia e Comprovante de Tributos Federais (DARF/DARM)',
+                'description' => 'Documento de Arrecadação de Receitas Federais e comprovante de pagamento de impostos.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Recibo de Entrega da DCTFWeb / EFD-Reinf',
+                'description' => 'Comprovante de transmissão das declarações fiscais e previdenciárias de controle do Fisco Federal.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Recibo de Envio do eSocial',
+                'description' => 'Protocolo de envio de informações trabalhistas e de folha de pagamento ao sistema do governo.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Extrato do PGDAS-D',
+                'description' => 'Extrato gerador declaratório mensal de tributos do regime Simples Nacional.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
+            [
+                'name' => 'Declaração do Simples Nacional (DEFIS)',
+                'description' => 'Declaração anual simplificada de informações socioeconômicas e fiscais.',
+                'periodicity' => 'annual',
+                'required' => true,
+            ],
+            [
+                'name' => 'Certidão Negativa de Débitos Estaduais (CND Estadual)',
+                'description' => 'Comprovante de regularidade fiscal perante a Fazenda Pública Estadual.',
+                'periodicity' => 'semi-annual',
+                'required' => true,
+            ],
+            [
+                'name' => 'Certidão Negativa de Débitos Municipais (CND Municipal)',
+                'description' => 'Comprovante de regularidade fiscal perante a Fazenda Pública Municipal (Prefeitura).',
+                'periodicity' => 'semi-annual',
+                'required' => true,
+            ],
+            [
+                'name' => 'Folha de Pagamento e Encargos Sociais (GFIP/SEFIP/FGTS)',
+                'description' => 'Comprovantes de salários e guias de recolhimento de encargos sociais de funcionários alocados.',
+                'periodicity' => 'monthly',
+                'required' => true,
+            ],
         ];
 
         foreach ($docTypes as $doc) {
-            DocumentType::create($doc);
+            DocumentType::firstOrCreate(['name' => $doc['name']], $doc);
         }
 
         // 4. Criar Usuários com Perfis Distintos
-        
+
         // Super Admin (Sem empresa vinculada, visualiza tudo)
         User::create([
             'name' => 'Administrador Global',
@@ -133,6 +199,16 @@ class DatabaseSeeder extends Seeder
             'active' => true,
         ]);
 
+        // Fornecedor Gama (Acesso ao painel do fornecedor Gama)
+        User::create([
+            'name' => 'Preposto Fornecedor Gama',
+            'email' => 'fornecedor@gama.local',
+            'password' => Hash::make('password'),
+            'role' => 'fornecedor',
+            'provider_id' => $providerGama->id,
+            'active' => true,
+        ]);
+
         // 5. Criar Contratos de Teste
         $contract1 = Contract::create([
             'company_id' => $companyAlpha->id,
@@ -160,7 +236,7 @@ class DatabaseSeeder extends Seeder
         $types = DocumentType::all();
 
         // Para o Contrato 1 (Fornecedor Beta):
-        
+
         // CRF do FGTS - Pendente (Atrasado)
         ContractDocument::create([
             'contract_id' => $contract1->id,
@@ -171,7 +247,7 @@ class DatabaseSeeder extends Seeder
 
         // INSS/RFB - Enviado (Aguardando Análise)
         // Criar uma pasta e arquivo dummy para teste de download
-        $dummyPath = 'private/documents/contracts/' . $contract1->id . '/receita_federal.pdf';
+        $dummyPath = 'private/documents/contracts/'.$contract1->id.'/receita_federal.pdf';
         Storage::put($dummyPath, 'Dummy PDF content for testing');
 
         ContractDocument::create([
@@ -188,7 +264,7 @@ class DatabaseSeeder extends Seeder
         ContractDocument::create([
             'contract_id' => $contract1->id,
             'document_type_id' => $types->where('name', 'Certidão Negativa de Débitos Trabalhistas (CNDT)')->first()->id,
-            'file_path' => 'private/documents/contracts/' . $contract1->id . '/cndt_velha.pdf',
+            'file_path' => 'private/documents/contracts/'.$contract1->id.'/cndt_velha.pdf',
             'original_name' => 'cndt_ano_passado.pdf',
             'due_date' => now()->addDays(20),
             'status' => 'rejected',
@@ -201,7 +277,7 @@ class DatabaseSeeder extends Seeder
         ContractDocument::create([
             'contract_id' => $contract1->id,
             'document_type_id' => $types->where('name', 'Contrato Social ou Estatuto Atualizado')->first()->id,
-            'file_path' => 'private/documents/contracts/' . $contract1->id . '/contrato_social.pdf',
+            'file_path' => 'private/documents/contracts/'.$contract1->id.'/contrato_social.pdf',
             'original_name' => 'contrato_social_assinado.pdf',
             'due_date' => now()->subDays(10),
             'status' => 'approved',

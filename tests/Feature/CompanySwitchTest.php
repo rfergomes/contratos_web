@@ -50,7 +50,7 @@ class CompanySwitchTest extends TestCase
     public function test_super_admin_can_switch_to_any_company_or_null(): void
     {
         $company1 = Company::create(['name' => 'Empresa Alpha', 'cnpj' => '11111111000111']);
-        
+
         $admin = User::create([
             'name' => 'Admin Teste',
             'email' => 'admin@teste.com',

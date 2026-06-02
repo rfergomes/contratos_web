@@ -33,7 +33,7 @@ return new class extends Migration
                 'response_file_path',
                 'response_original_name',
                 'due_date',
-                'requires_attachment'
+                'requires_attachment',
             ]);
         });
     }

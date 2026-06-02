@@ -7,7 +7,6 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\ContractDocument;
 use App\Models\Provider;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -72,7 +71,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Alerta marcado como lido!'
+            'message' => 'Alerta marcado como lido!',
         ]);
     }
 
@@ -87,7 +86,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Todos os alertas foram marcados como lidos!'
+            'message' => 'Todos os alertas foram marcados como lidos!',
         ]);
     }
 

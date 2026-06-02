@@ -16,8 +16,11 @@ class ContractLifecycleTest extends TestCase
     use RefreshDatabase;
 
     protected User $gestor;
+
     protected Company $company;
+
     protected Provider $provider;
+
     protected DocumentType $docType;
 
     protected function setUp(): void
@@ -63,10 +66,10 @@ class ContractLifecycleTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         $contract = Contract::where('contract_number', 'CTR-LIFECYCLE-1')->first();
         $this->assertNotNull($contract);
-        
+
         // Deve começar com status 'pending'
         $this->assertEquals('pending', $contract->status);
         $this->assertFalse($contract->signature_validated);

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alert;
 use App\Models\Contract;
-use App\Models\ContractRequest;
 use App\Models\ContractHistory;
+use App\Models\ContractRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +43,7 @@ class ContractRequestController extends Controller
         $originalName = null;
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
-            $filePath = $request->file('file')->store('private/requests/sender/' . $contract->id);
+            $filePath = $request->file('file')->store('private/requests/sender/'.$contract->id);
             $originalName = $request->file('file')->getClientOriginalName();
         }
 
@@ -66,7 +67,7 @@ class ContractRequestController extends Controller
             'amendment' => 'Aditivo Contratual',
             'renewal' => 'Renovação',
             'document' => 'Ajuste de Documento',
-            'other' => 'Outro'
+            'other' => 'Outro',
         ];
         $typeName = $types[$request->type] ?? $request->type;
 
@@ -74,7 +75,7 @@ class ContractRequestController extends Controller
         ContractHistory::log(
             $contract->id,
             'request_opened',
-            'Solicitação Aberta: ' . $typeName,
+            'Solicitação Aberta: '.$typeName,
             "Solicitação \"{$request->title}\" aberta por {$user->name}."
         );
 
@@ -125,7 +126,7 @@ class ContractRequestController extends Controller
             if ($contractRequest->response_file_path && Storage::exists($contractRequest->response_file_path)) {
                 Storage::delete($contractRequest->response_file_path);
             }
-            $responseFilePath = $request->file('response_file')->store('private/requests/responder/' . $contractRequest->contract_id);
+            $responseFilePath = $request->file('response_file')->store('private/requests/responder/'.$contractRequest->contract_id);
             $responseOriginalName = $request->file('response_file')->getClientOriginalName();
         }
 
@@ -138,7 +139,7 @@ class ContractRequestController extends Controller
             'responded_at' => now(),
         ]);
 
-        \App\Models\Alert::createForRequestResponse($contractRequest);
+        Alert::createForRequestResponse($contractRequest);
 
         // Registrar no histórico do contrato
         $actionName = $request->status === 'resolved' ? 'Resolvida' : 'Recusada';
@@ -152,6 +153,7 @@ class ContractRequestController extends Controller
         );
 
         $msgType = $request->status === 'resolved' ? 'success' : 'warning';
+
         return back()->with($msgType, "Solicitação respondida como {$actionName}!");
     }
 
@@ -177,7 +179,7 @@ class ContractRequestController extends Controller
             $hasAccess = false;
         }
 
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             abort(403, 'Acesso não autorizado a este anexo.');
         }
 
@@ -191,7 +193,7 @@ class ContractRequestController extends Controller
             abort(404, 'Lado do anexo inválido.');
         }
 
-        if (!$path || !Storage::exists($path)) {
+        if (! $path || ! Storage::exists($path)) {
             abort(404, 'Arquivo de anexo não disponível.');
         }
 

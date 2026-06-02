@@ -32,12 +32,12 @@ class CompanyScope implements Scope
                 if ($user->isGestor() || ($user->isSuperAdmin() && $user->company_id)) {
                     // Filtra pelo company_id se a tabela possuir essa coluna
                     if ($model->getTable() === 'contracts' || $model->getTable() === 'users') {
-                        $builder->where($model->getTable() . '.company_id', $user->company_id);
+                        $builder->where($model->getTable().'.company_id', $user->company_id);
                     }
                 } elseif ($user->isFornecedor()) {
                     // Filtra pelo provider_id se for um fornecedor
                     if ($model->getTable() === 'contracts') {
-                        $builder->where($model->getTable() . '.provider_id', $user->provider_id);
+                        $builder->where($model->getTable().'.provider_id', $user->provider_id);
                     }
                 }
             }

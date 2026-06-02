@@ -37,7 +37,7 @@ class GedSecurityTest extends TestCase
         $docType = DocumentType::create([
             'name' => 'FGTS',
             'periodicity' => 'monthly',
-            'required' => true
+            'required' => true,
         ]);
 
         // Contratos distintos
@@ -68,7 +68,7 @@ class GedSecurityTest extends TestCase
             'file_path' => 'private/documents/contracts/1/fgts.pdf',
             'original_name' => 'fgts.pdf',
             'due_date' => '2026-06-15',
-            'status' => 'submitted'
+            'status' => 'submitted',
         ]);
 
         // Cria usuários vinculados a cada fornecedor

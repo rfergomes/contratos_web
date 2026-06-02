@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ContractExpiryAlert;
 use App\Models\Company;
 use App\Models\Contract;
 use App\Models\Provider;
 use App\Models\User;
-use App\Mail\ContractExpiryAlert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -67,7 +67,7 @@ class ContractExpiryAlertTest extends TestCase
         Mail::assertSent(ContractExpiryAlert::class, function (ContractExpiryAlert $mail) use ($contractTriggering, $responsible) {
             return $mail->contract->id === $contractTriggering->id &&
                    $mail->hasTo($responsible->email) &&
-                   $mail->envelope()->subject === "[Alerta CLM] O contrato com o cliente Empresa A vence em 30 dias. É necessário renovar?";
+                   $mail->envelope()->subject === '[Alerta CLM] O contrato com o cliente Empresa A vence em 30 dias. É necessário renovar?';
         });
 
         // Verifica se o segundo não foi enviado

@@ -19,8 +19,6 @@ class ProviderController extends Controller
         return view('providers.index', compact('providers'));
     }
 
-
-
     /**
      * Salva novo fornecedor.
      */
@@ -46,8 +44,6 @@ class ProviderController extends Controller
         return redirect()->route('providers.index')->with('success', 'Fornecedor cadastrado com sucesso!');
     }
 
-
-
     /**
      * Atualiza dados do fornecedor.
      */
@@ -57,7 +53,7 @@ class ProviderController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'cnpj' => 'required|string|max:20|unique:providers,cnpj,' . $provider->id,
+            'cnpj' => 'required|string|max:20|unique:providers,cnpj,'.$provider->id,
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
         ]);
@@ -80,7 +76,7 @@ class ProviderController extends Controller
         abort_if(auth()->user()->isFornecedor(), 403);
 
         $provider->update([
-            'active' => !$provider->active
+            'active' => ! $provider->active,
         ]);
 
         return back()->with('success', 'Status do fornecedor alterado com sucesso!');

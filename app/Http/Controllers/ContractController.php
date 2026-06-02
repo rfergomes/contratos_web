@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Contract;
 use App\Models\ContractDocument;
+use App\Models\ContractHistory;
 use App\Models\DocumentType;
 use App\Models\Provider;
 use App\Models\User;
@@ -28,7 +29,7 @@ class ContractController extends Controller
         $documentTypes = [];
         $responsibles = [];
 
-        if (!auth()->user()->isFornecedor()) {
+        if (! auth()->user()->isFornecedor()) {
             $companies = Company::where('active', true)->orderBy('name', 'asc')->get();
             $providers = Provider::where('active', true)->orderBy('name', 'asc')->get();
             $documentTypes = DocumentType::where('required', true)->get();
@@ -40,8 +41,6 @@ class ContractController extends Controller
 
         return view('contracts.index', compact('contracts', 'companies', 'providers', 'documentTypes', 'responsibles'));
     }
-
-
 
     /**
      * Salva o novo contrato e gera obrigações documentais automaticamente.
@@ -59,7 +58,7 @@ class ContractController extends Controller
 
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'required|exists:providers,id',
+            'provider_id' => 'nullable|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -100,12 +99,10 @@ class ContractController extends Controller
         }
 
         // Registrar no histórico do contrato
-        \App\Models\ContractHistory::log($contract->id, 'created', 'Contrato Criado', 'O contrato foi cadastrado no sistema por ' . auth()->user()->name);
+        ContractHistory::log($contract->id, 'created', 'Contrato Criado', 'O contrato foi cadastrado no sistema por '.auth()->user()->name);
 
         return redirect()->route('contracts.index')->with('success', 'Contrato cadastrado com sucesso e obrigações documentais geradas!');
     }
-
-
 
     /**
      * Atualiza dados do contrato.
@@ -121,7 +118,7 @@ class ContractController extends Controller
 
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'required|exists:providers,id',
+            'provider_id' => 'nullable|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -149,9 +146,9 @@ class ContractController extends Controller
 
         // Registrar no histórico do contrato
         if ($oldStatus !== $contract->status) {
-            \App\Models\ContractHistory::log($contract->id, 'status_changed', 'Status Alterado', 'O status do contrato foi alterado de ' . $oldStatus . ' para ' . $contract->status . ' por ' . auth()->user()->name);
+            ContractHistory::log($contract->id, 'status_changed', 'Status Alterado', 'O status do contrato foi alterado de '.$oldStatus.' para '.$contract->status.' por '.auth()->user()->name);
         } else {
-            \App\Models\ContractHistory::log($contract->id, 'updated', 'Contrato Atualizado', 'As informações do contrato foram atualizadas por ' . auth()->user()->name);
+            ContractHistory::log($contract->id, 'updated', 'Contrato Atualizado', 'As informações do contrato foram atualizadas por '.auth()->user()->name);
         }
 
         return redirect()->route('contracts.index')->with('success', 'Contrato atualizado com sucesso!');
@@ -190,7 +187,7 @@ class ContractController extends Controller
         ]);
 
         $documentTypes = [];
-        if (!auth()->user()->isFornecedor()) {
+        if (! auth()->user()->isFornecedor()) {
             $documentTypes = DocumentType::orderBy('name', 'asc')->get();
         }
 
@@ -236,11 +233,11 @@ class ContractController extends Controller
         ]);
 
         // Registrar no histórico do contrato
-        \App\Models\ContractHistory::log(
+        ContractHistory::log(
             $contract->id,
             'document_required',
             'Nova Obrigação Exigida',
-            'Uma nova obrigação documental ("' . $doc->documentType->name . '") com vencimento em ' . $doc->due_date->format('d/m/Y') . ' foi exigida por ' . $user->name
+            'Uma nova obrigação documental ("'.$doc->documentType->name.'") com vencimento em '.$doc->due_date->format('d/m/Y').' foi exigida por '.$user->name
         );
 
         return back()->with('success', 'Nova obrigação documental adicionada com sucesso!');
@@ -267,11 +264,11 @@ class ContractController extends Controller
         ]);
 
         // Registrar no histórico do contrato
-        \App\Models\ContractHistory::log(
+        ContractHistory::log(
             $contract->id,
             'signature_validated',
             'Assinatura Validada',
-            'A assinatura do contrato foi validada e confirmada por ' . $user->name
+            'A assinatura do contrato foi validada e confirmada por '.$user->name
         );
 
         return back()->with('success', 'Assinatura do contrato validada com sucesso! O status foi atualizado.');

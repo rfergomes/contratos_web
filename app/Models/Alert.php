@@ -72,7 +72,9 @@ class Alert extends Model
 
         foreach ($pendingRequests as $request) {
             $contract = $request->contract;
-            if (!$contract) continue;
+            if (! $contract) {
+                continue;
+            }
 
             $shouldAlert = false;
 
@@ -84,7 +86,7 @@ class Alert extends Model
             }
             // Se o remetente foi a empresa, o responsável por responder é o fornecedor
             elseif ($request->sender_type === 'company') {
-                if ($user->isFornecedor() && $contract->provider_id === $user->provider_id) {
+                if ($user->isFornecedor() && $contract->provider_id && $contract->provider_id === $user->provider_id) {
                     $shouldAlert = true;
                 }
             }
@@ -98,17 +100,17 @@ class Alert extends Model
                     ->whereNull('read_at')
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $daysRemaining = $today->diffInDays($request->due_date, false);
-                    $deadlineMsg = $daysRemaining < 0 
-                        ? "atrasada há " . abs($daysRemaining) . " dia(s)" 
+                    $deadlineMsg = $daysRemaining < 0
+                        ? 'atrasada há '.abs($daysRemaining).' dia(s)'
                         : "vence em {$daysRemaining} dia(s)";
 
                     self::create([
                         'user_id' => $user->id,
                         'title' => 'Prazo de Solicitação Próximo',
                         'message' => "A solicitação '{$request->title}' no contrato {$contract->contract_number} está {$deadlineMsg}.",
-                        'link' => route('contracts.show', $contract->id) . '#timeline',
+                        'link' => route('contracts.show', $contract->id).'#timeline',
                         'type' => 'request_deadline',
                         'source_type' => 'ContractRequest',
                         'source_id' => $request->id,
@@ -134,12 +136,14 @@ class Alert extends Model
 
         foreach ($pendingDocs as $doc) {
             $contract = $doc->contract;
-            if (!$contract) continue;
+            if (! $contract) {
+                continue;
+            }
 
             $shouldAlert = false;
 
             // Se for fornecedor e o contrato é dele
-            if ($user->isFornecedor() && $contract->provider_id === $user->provider_id) {
+            if ($user->isFornecedor() && $contract->provider_id && $contract->provider_id === $user->provider_id) {
                 $shouldAlert = true;
             }
             // Se for gestor e o contrato pertence à empresa dele (para ele cobrar o fornecedor)
@@ -155,13 +159,13 @@ class Alert extends Model
                     ->whereNull('read_at')
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $daysRemaining = $today->diffInDays($doc->due_date, false);
-                    $deadlineMsg = $daysRemaining < 0 
-                        ? "atrasada há " . abs($daysRemaining) . " dia(s)" 
+                    $deadlineMsg = $daysRemaining < 0
+                        ? 'atrasada há '.abs($daysRemaining).' dia(s)'
                         : "vence em {$daysRemaining} dia(s)";
 
-                    $rolePrefix = $user->isFornecedor() ? "Você precisa enviar" : "O fornecedor deve enviar";
+                    $rolePrefix = $user->isFornecedor() ? 'Você precisa enviar' : 'O fornecedor deve enviar';
 
                     self::create([
                         'user_id' => $user->id,
@@ -183,12 +187,14 @@ class Alert extends Model
     public static function createForNewRequest(ContractRequest $request): void
     {
         $contract = $request->contract;
-        if (!$contract) return;
+        if (! $contract) {
+            return;
+        }
 
         $users = collect();
 
         // Se aberta por empresa, notifica todos os usuários ativos do fornecedor
-        if ($request->sender_type === 'company') {
+        if ($request->sender_type === 'company' && $contract->provider_id) {
             $users = User::withoutGlobalScopes()
                 ->where('provider_id', $contract->provider_id)
                 ->where('active', true)
@@ -214,8 +220,8 @@ class Alert extends Model
             self::create([
                 'user_id' => $user->id,
                 'title' => 'Nova Solicitação Recebida',
-                'message' => "Uma nova solicitação do tipo '" . __($request->type) . "' foi aberta no contrato {$contract->contract_number}.",
-                'link' => route('contracts.show', $contract->id) . '#timeline',
+                'message' => "Uma nova solicitação do tipo '".__($request->type)."' foi aberta no contrato {$contract->contract_number}.",
+                'link' => route('contracts.show', $contract->id).'#timeline',
                 'type' => 'new_request',
                 'source_type' => 'ContractRequest',
                 'source_id' => $request->id,
@@ -229,11 +235,15 @@ class Alert extends Model
     public static function createForRequestResponse(ContractRequest $request): void
     {
         $contract = $request->contract;
-        if (!$contract) return;
+        if (! $contract) {
+            return;
+        }
 
         // O destinatário é o usuário que abriu originalmente a solicitação
         $creator = User::withoutGlobalScopes()->find($request->user_id);
-        if (!$creator || !$creator->active) return;
+        if (! $creator || ! $creator->active) {
+            return;
+        }
 
         $statusStr = $request->status === 'resolved' ? 'resolvida' : 'rejeitada';
 
@@ -241,7 +251,7 @@ class Alert extends Model
             'user_id' => $creator->id,
             'title' => 'Solicitação Respondida',
             'message' => "A sua solicitação '{$request->title}' no contrato {$contract->contract_number} foi {$statusStr}.",
-            'link' => route('contracts.show', $contract->id) . '#timeline',
+            'link' => route('contracts.show', $contract->id).'#timeline',
             'type' => 'request_response',
             'source_type' => 'ContractRequest',
             'source_id' => $request->id,

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contract;
 use App\Models\ContractDocument;
+use App\Models\ContractHistory;
 use App\Models\ContractRequest;
 use App\Models\TemporaryAccessToken;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PublicAccessController extends Controller
@@ -18,30 +19,39 @@ class PublicAccessController extends Controller
     {
         $accessToken = TemporaryAccessToken::where('token', $token)->first();
 
-        if (!$accessToken || $accessToken->expires_at->isPast()) {
+        if (! $accessToken || $accessToken->expires_at->isPast()) {
             if ($accessToken) {
                 $accessToken->delete(); // Limpa token expirado
             }
+
             return redirect()->route('login')->with('error', 'O link de acesso expirou ou é inválido.');
         }
 
-        $item = $accessToken->tokenable;
-        if (!$item) {
+        // Busca o recurso sem escopos globais para permitir visualização mesmo se outro fornecedor estiver logado
+        $item = null;
+        if ($accessToken->tokenable_type) {
+            $item = $accessToken->tokenable_type::withoutGlobalScopes()->find($accessToken->tokenable_id);
+        }
+
+        if (! $item) {
             $accessToken->delete();
+
             return redirect()->route('login')->with('error', 'O recurso associado a este link não existe mais.');
         }
 
-        $contract = $item->contract;
-        if (!$contract) {
+        // Busca o contrato sem escopos globais
+        $contract = Contract::withoutGlobalScopes()->find($item->contract_id);
+        if (! $contract) {
             $accessToken->delete();
+
             return redirect()->route('login')->with('error', 'Contrato não encontrado para este recurso.');
         }
 
         $resourceName = '';
         if ($accessToken->tokenable_type === ContractRequest::class) {
-            $resourceName = 'Solicitação: ' . $item->title;
+            $resourceName = 'Solicitação: '.$item->title;
         } elseif ($accessToken->tokenable_type === ContractDocument::class) {
-            $resourceName = 'Obrigação Documental: ' . $item->documentType->name;
+            $resourceName = 'Obrigação Documental: '.$item->documentType->name;
         }
 
         return view('auth.magic_login', [
@@ -60,22 +70,37 @@ class PublicAccessController extends Controller
     {
         $accessToken = TemporaryAccessToken::where('token', $token)->first();
 
-        if (!$accessToken || $accessToken->expires_at->isPast()) {
+        if (! $accessToken || $accessToken->expires_at->isPast()) {
             if ($accessToken) {
                 $accessToken->delete(); // Limpa token expirado
             }
+
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'O link de acesso expirou ou é inválido.');
         }
 
-        $item = $accessToken->tokenable;
-        if (!$item) {
+        // Busca o recurso sem escopos globais para permitir a validação e posterior troca de sessão
+        $item = null;
+        if ($accessToken->tokenable_type) {
+            $item = $accessToken->tokenable_type::withoutGlobalScopes()->find($accessToken->tokenable_id);
+        }
+
+        if (! $item) {
             $accessToken->delete();
+
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'O recurso associado a este link não existe mais.');
         }
 
-        $contract = $item->contract;
-        if (!$contract) {
+        // Busca o contrato sem escopos globais
+        $contract = Contract::withoutGlobalScopes()->find($item->contract_id);
+        if (! $contract) {
             $accessToken->delete();
+
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'Contrato não encontrado para este recurso.');
         }
 
@@ -86,23 +111,33 @@ class PublicAccessController extends Controller
             ->where('active', true)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
+            $this->clearSession();
+
             return redirect()->route('login')->with('error', 'Nenhum usuário ativo de fornecedor configurado para este contrato.');
+        }
+
+        // Se outro usuário estiver logado, efetua o logout e invalida a sessão antiga antes de logar o novo
+        if (Auth::check() && Auth::id() !== $user->id) {
+            $this->clearSession();
         }
 
         // Login automático do usuário
         Auth::login($user);
 
+        // Salva o tipo do recurso ANTES de deletar o token (evitar perda do estado após delete)
+        $tokenableType = $accessToken->tokenable_type;
+
         // Deleta o token para garantir uso único (Single-Use)
         $accessToken->delete();
 
         // Determina o destino baseado no tipo do recurso
-        if ($accessToken->tokenable_type === ContractRequest::class) {
-            return redirect()->to(route('contracts.show', $contract->id) . '#timeline')
+        if ($tokenableType === ContractRequest::class) {
+            return redirect()->to(route('contracts.show', $contract->id).'#timeline')
                 ->with('success', 'Acesso autenticado via Link Mágico. Você foi direcionado para a solicitação.');
         }
 
-        if ($accessToken->tokenable_type === ContractDocument::class) {
+        if ($tokenableType === ContractDocument::class) {
             return redirect()->route('ged.index')
                 ->with('success', 'Acesso autenticado via Link Mágico. Envie o documento exigido abaixo.');
         }
@@ -111,25 +146,38 @@ class PublicAccessController extends Controller
     }
 
     /**
+     * Limpa a sessão ativa se houver algum usuário logado.
+     */
+    protected function clearSession(): void
+    {
+        if (Auth::check()) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
+    }
+
+    /**
      * Gera o link temporário e mensagem de WhatsApp para uma solicitação pendente.
      */
     public function generateRequestLink(ContractRequest $request)
     {
         abort_if(Auth::user()->isFornecedor(), 403, 'Acesso não autorizado.');
+        abort_if(is_null($request->contract->provider_id), 422, 'Contratos internos não possuem fornecedor para notificar.');
 
         $token = TemporaryAccessToken::generateFor($request);
         $link = route('public.access', $token->token);
 
         $message = "Olá! Nova solicitação pendente no Contrato {$request->contract->contract_number}.\n\n"
-                 . "Por favor, acesse o link temporário seguro para responder:\n"
-                 . $link;
+                 ."Por favor, acesse o link temporário seguro para responder:\n"
+                 .$link;
 
         // Registrar no histórico do contrato
-        \App\Models\ContractHistory::log(
+        ContractHistory::log(
             $request->contract_id,
             'whatsapp_charge',
             'Cobrança via WhatsApp',
-            'Uma cobrança/notificação sobre a solicitação "' . $request->title . '" foi gerada para envio via WhatsApp por ' . Auth::user()->name
+            'Uma cobrança/notificação sobre a solicitação "'.$request->title.'" foi gerada para envio via WhatsApp por '.Auth::user()->name
         );
 
         return response()->json([
@@ -145,20 +193,21 @@ class PublicAccessController extends Controller
     public function generateDocumentLink(ContractDocument $document)
     {
         abort_if(Auth::user()->isFornecedor(), 403, 'Acesso não autorizado.');
+        abort_if(is_null($document->contract->provider_id), 422, 'Contratos internos não possuem fornecedor para notificar.');
 
         $token = TemporaryAccessToken::generateFor($document);
         $link = route('public.access', $token->token);
 
         $message = "Olá! O documento '{$document->documentType->name}' do Contrato {$document->contract->contract_number} está pendente de envio.\n\n"
-                 . "Por favor, acesse o link temporário seguro para fazer o upload:\n"
-                 . $link;
+                 ."Por favor, acesse o link temporário seguro para fazer o upload:\n"
+                 .$link;
 
         // Registrar no histórico do contrato
-        \App\Models\ContractHistory::log(
+        ContractHistory::log(
             $document->contract_id,
             'whatsapp_charge',
             'Cobrança via WhatsApp',
-            'Uma cobrança/notificação sobre o documento "' . $document->documentType->name . '" foi gerada para envio via WhatsApp por ' . Auth::user()->name
+            'Uma cobrança/notificação sobre o documento "'.$document->documentType->name.'" foi gerada para envio via WhatsApp por '.Auth::user()->name
         );
 
         return response()->json([

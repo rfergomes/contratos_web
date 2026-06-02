@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Company;
 use App\Models\Provider;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -100,7 +100,7 @@ class UserController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => ['nullable', Password::defaults()],
             'role' => 'required|in:super_admin,gestor,fornecedor',
             'company_id' => 'nullable|exists:companies,id',
@@ -160,7 +160,7 @@ class UserController extends Controller
         }
 
         $user->update([
-            'active' => !$user->active
+            'active' => ! $user->active,
         ]);
 
         return back()->with('success', 'Status do usuário alterado com sucesso!');

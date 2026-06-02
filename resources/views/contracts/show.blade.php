@@ -38,8 +38,13 @@
                     <div class="row text-center text-md-start">
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
                             <span class="text-muted fs-8 d-block text-uppercase">Fornecedor Contratado</span>
-                            <strong class="text-dark"><i class="fa-solid fa-handshake me-1 text-primary"></i> {{ $contract->provider->name }}</strong>
-                            <small class="d-block text-muted">CNPJ: {{ $contract->provider->cnpj }}</small>
+                            @if($contract->provider)
+                                <strong class="text-dark"><i class="fa-solid fa-handshake me-1 text-primary"></i> {{ $contract->provider->name }}</strong>
+                                <small class="d-block text-muted">CNPJ: {{ $contract->provider->cnpj }}</small>
+                            @else
+                                <strong class="text-secondary"><i class="fa-solid fa-handshake me-1 text-muted"></i> Controle Interno</strong>
+                                <small class="d-block text-muted">Sem fornecedor atribuído</small>
+                            @endif
                         </div>
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
                             <span class="text-muted fs-8 d-block text-uppercase">Gestor Responsável</span>
@@ -84,14 +89,15 @@
     <!-- 2. Stepper Horizontal (Andamento do Contrato) -->
     @php
         // Lógica de determinação da etapa ativa no Stepper
+        // Nova ordem: 1-Elaboração | 2-Assinatura | 3-Compliance GED | 4-Vigência Ativa | 5-Encerrado
         $hasPendingDocs = $contract->documents->contains(fn($doc) => in_array($doc->status, ['pending', 'rejected']));
         $hasSubmittedDocs = $contract->documents->contains('status', 'submitted');
-        
+
         $step1 = 'completed'; // Elaboração sempre concluída
-        $step2 = 'inactive';
-        $step3 = 'inactive';
-        $step4 = 'inactive';
-        $step5 = 'inactive';
+        $step2 = 'inactive';  // Assinatura
+        $step3 = 'inactive';  // Compliance GED
+        $step4 = 'inactive';  // Vigência Ativa
+        $step5 = 'inactive';  // Encerrado / Suspenso
 
         if ($contract->status === 'draft') {
             $step1 = 'active';
@@ -106,12 +112,18 @@
             $step2 = 'completed';
             $step3 = 'completed';
             $step4 = 'active';
-        } else { // status normal mas sob análise
-            if ($hasPendingDocs || $hasSubmittedDocs) {
+        } else { // em análise / vigente normal
+            // Passo 2: Assinatura
+            if (!$contract->signature_validated) {
                 $step2 = 'active';
             } else {
                 $step2 = 'completed';
-                $step3 = 'active';
+                // Passo 3: GED só começa depois da assinatura
+                if ($hasPendingDocs || $hasSubmittedDocs) {
+                    $step3 = 'active';
+                } else {
+                    $step3 = 'completed';
+                }
             }
         }
     @endphp
@@ -131,10 +143,24 @@
                             <div class="stepper-title">Elaboração</div>
                             <div class="stepper-desc">Rascunho criado</div>
                         </li>
-                        <!-- Passo 2: Documentos (GED) -->
+                        <!-- Passo 2: Assinatura -->
                         <li class="stepper-item {{ $step2 }}">
                             <div class="stepper-circle">
                                 @if($step2 === 'completed') <i class="fa-solid fa-check"></i> @else 2 @endif
+                            </div>
+                            <div class="stepper-title">Assinatura</div>
+                            <div class="stepper-desc">
+                                @if($contract->signature_validated)
+                                    Assinatura Confirmada
+                                @else
+                                    Coleta de Firmas
+                                @endif
+                            </div>
+                        </li>
+                        <!-- Passo 3: Documentos (GED) -->
+                        <li class="stepper-item {{ $step3 }}">
+                            <div class="stepper-circle">
+                                @if($step3 === 'completed') <i class="fa-solid fa-check"></i> @else 3 @endif
                             </div>
                             <div class="stepper-title">Compliance GED</div>
                             <div class="stepper-desc">
@@ -144,20 +170,6 @@
                                     Documentos em Análise
                                 @else
                                     Documentos Aprovados
-                                @endif
-                            </div>
-                        </li>
-                        <!-- Passo 3: Assinatura -->
-                        <li class="stepper-item {{ $step3 }}">
-                            <div class="stepper-circle">
-                                @if($step3 === 'completed') <i class="fa-solid fa-check"></i> @else 3 @endif
-                            </div>
-                            <div class="stepper-title">Assinatura</div>
-                            <div class="stepper-desc">
-                                @if($contract->signature_validated)
-                                    Assinatura Confirmada
-                                @else
-                                    Coleta de Firmas
                                 @endif
                             </div>
                         </li>
@@ -500,7 +512,7 @@
                                                             @case('other') Outro @break
                                                         @endswitch
                                                     </span>
-                                                    @if(!auth()->user()->isFornecedor() && $req->status === 'pending')
+                                                    @if(!auth()->user()->isFornecedor() && $req->status === 'pending' && $contract->provider_id)
                                                         <div class="mt-2 text-start">
                                                             <button type="button" class="btn btn-xs btn-success btn-whatsapp-notify" data-id="{{ $req->id }}" data-type="request" title="Notificar via WhatsApp">
                                                                 <i class="fa-brands fa-whatsapp me-1"></i> Notificar via WhatsApp
@@ -629,7 +641,7 @@
                                                                 <i class="fa-solid fa-xmark"></i>
                                                             </button>
                                                         @endif
-                                                        @if(in_array($doc->status, ['pending', 'rejected']))
+                                                        @if(in_array($doc->status, ['pending', 'rejected']) && $contract->provider_id)
                                                             <button type="button" class="btn btn-xs btn-success py-0.5 px-1.5 btn-whatsapp-notify" data-id="{{ $doc->id }}" data-type="document" title="Cobrar Envio via WhatsApp">
                                                                 <i class="fa-brands fa-whatsapp"></i> Cobrar
                                                             </button>
@@ -928,6 +940,7 @@
     </script>
 @endpush
 
+@if($contract->provider)
 <!-- MODAL DE SELEÇÃO DE CONTATO WHATSAPP -->
 <div class="modal fade" id="whatsappNotifyModal" tabindex="-1" aria-labelledby="whatsappNotifyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -973,4 +986,5 @@
         </div>
     </div>
 </div>
+@endif
 
