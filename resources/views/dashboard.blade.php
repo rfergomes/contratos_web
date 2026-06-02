@@ -10,10 +10,10 @@
     <!-- Saudação Inicial -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-primary text-white shadow-sm border-0">
+            <div class="card bg-light text-dark shadow-md">
                 <div class="card-body p-4">
-                    <h4 class="mb-1">Olá, {{ auth()->user()->name }}!</h4>
-                    <p class="mb-0 opacity-75">
+                    <h5 class="mb-2">Olá, {{ auth()->user()->name }}!</h5>
+                    <p class="mb-0 fs-6 opacity-75">
                         @if(auth()->user()->isSuperAdmin())
                             Você está logado como <strong>Administrador Global</strong>. Aqui está a visão geral do sistema.
                         @elseif(auth()->user()->isGestor())
