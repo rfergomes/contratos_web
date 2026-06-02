@@ -153,7 +153,7 @@
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($contracts as $contract)
                                     <div class="col card-item" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
-                                        <div class="card h-100 shadow-sm border border-light">
+                                        <div class="card h-100 card-info card-outline shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                                     <div class="d-flex align-items-center">
