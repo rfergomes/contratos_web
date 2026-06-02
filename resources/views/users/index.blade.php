@@ -9,7 +9,7 @@
 @section('content')
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm bg-transparent mb-4">
+            <div class="card shadow-sm mb-4">
                 <div class="card-header border-0 bg-white py-3">
                     <div class="d-flex justify-content-between align-items-center w-100">
                         <h5 class="mb-0 text-secondary">
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body bg-transparent p-0">
                     @if($users->isEmpty())
                         <div class="text-center p-5">
                             <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>
