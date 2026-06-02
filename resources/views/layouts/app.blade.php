@@ -203,23 +203,23 @@
                         @if(auth()->user()->isGestor() || auth()->user()->isSuperAdmin())
                             <div class="nav-header text-uppercase text-secondary fs-7 px-3 mt-3 mb-1">Gestão de Contratos</div>
                             <li class="nav-item">
+                                <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-check-double"></i>
+                                    <p>Aprovações</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ route('contracts.index') }}" class="nav-link {{ request()->routeIs('contracts.*') ? 'active' : '' }}">
                                     <i class="nav-icon fa-solid fa-file-contract"></i>
                                     <p>Contratos</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('ged.index') }}" class="nav-link {{ request()->routeIs('ged.index') ? 'active' : '' }}">
-                                    <i class="nav-icon fa-solid fa-check-double"></i>
-                                    <p>Aprovações</p>
+                                <a href="{{ route('providers.index') }}" class="nav-link {{ request()->routeIs('providers.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fa-solid fa-handshake"></i>
+                                    <p>Fornecedores</p>
                                 </a>
                             </li>
-                        <li class="nav-item">
-                            <a href="{{ route('providers.index') }}" class="nav-link {{ request()->routeIs('providers.*') ? 'active' : '' }}">
-                                <i class="nav-icon fa-solid fa-handshake"></i>
-                                <p>Fornecedores</p>
-                            </a>
-                        </li>
                         @endif
 
                         @if(auth()->user()->isSuperAdmin())
