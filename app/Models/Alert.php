@@ -86,7 +86,7 @@ class Alert extends Model
             }
             // Se o remetente foi a empresa, o responsável por responder é o fornecedor
             elseif ($request->sender_type === 'company') {
-                if ($user->isFornecedor() && $contract->provider_id === $user->provider_id) {
+                if ($user->isFornecedor() && $contract->provider_id && $contract->provider_id === $user->provider_id) {
                     $shouldAlert = true;
                 }
             }
@@ -143,7 +143,7 @@ class Alert extends Model
             $shouldAlert = false;
 
             // Se for fornecedor e o contrato é dele
-            if ($user->isFornecedor() && $contract->provider_id === $user->provider_id) {
+            if ($user->isFornecedor() && $contract->provider_id && $contract->provider_id === $user->provider_id) {
                 $shouldAlert = true;
             }
             // Se for gestor e o contrato pertence à empresa dele (para ele cobrar o fornecedor)
@@ -194,7 +194,7 @@ class Alert extends Model
         $users = collect();
 
         // Se aberta por empresa, notifica todos os usuários ativos do fornecedor
-        if ($request->sender_type === 'company') {
+        if ($request->sender_type === 'company' && $contract->provider_id) {
             $users = User::withoutGlobalScopes()
                 ->where('provider_id', $contract->provider_id)
                 ->where('active', true)

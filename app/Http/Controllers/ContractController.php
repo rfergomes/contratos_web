@@ -58,7 +58,7 @@ class ContractController extends Controller
 
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'required|exists:providers,id',
+            'provider_id' => 'nullable|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',
@@ -118,7 +118,7 @@ class ContractController extends Controller
 
         $request->validate([
             'company_id' => 'required|exists:companies,id',
-            'provider_id' => 'required|exists:providers,id',
+            'provider_id' => 'nullable|exists:providers,id',
             'responsible_id' => 'nullable|exists:users,id',
             'contract_number' => 'required|string|max:100',
             'title' => 'required|string|max:255',

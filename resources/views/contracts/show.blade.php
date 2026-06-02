@@ -38,8 +38,13 @@
                     <div class="row text-center text-md-start">
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
                             <span class="text-muted fs-8 d-block text-uppercase">Fornecedor Contratado</span>
-                            <strong class="text-dark"><i class="fa-solid fa-handshake me-1 text-primary"></i> {{ $contract->provider->name }}</strong>
-                            <small class="d-block text-muted">CNPJ: {{ $contract->provider->cnpj }}</small>
+                            @if($contract->provider)
+                                <strong class="text-dark"><i class="fa-solid fa-handshake me-1 text-primary"></i> {{ $contract->provider->name }}</strong>
+                                <small class="d-block text-muted">CNPJ: {{ $contract->provider->cnpj }}</small>
+                            @else
+                                <strong class="text-secondary"><i class="fa-solid fa-handshake me-1 text-muted"></i> Controle Interno</strong>
+                                <small class="d-block text-muted">Sem fornecedor atribuído</small>
+                            @endif
                         </div>
                         <div class="col-md-4 col-12 mb-3 mb-md-0">
                             <span class="text-muted fs-8 d-block text-uppercase">Gestor Responsável</span>
@@ -507,7 +512,7 @@
                                                             @case('other') Outro @break
                                                         @endswitch
                                                     </span>
-                                                    @if(!auth()->user()->isFornecedor() && $req->status === 'pending')
+                                                    @if(!auth()->user()->isFornecedor() && $req->status === 'pending' && $contract->provider_id)
                                                         <div class="mt-2 text-start">
                                                             <button type="button" class="btn btn-xs btn-success btn-whatsapp-notify" data-id="{{ $req->id }}" data-type="request" title="Notificar via WhatsApp">
                                                                 <i class="fa-brands fa-whatsapp me-1"></i> Notificar via WhatsApp
@@ -636,7 +641,7 @@
                                                                 <i class="fa-solid fa-xmark"></i>
                                                             </button>
                                                         @endif
-                                                        @if(in_array($doc->status, ['pending', 'rejected']))
+                                                        @if(in_array($doc->status, ['pending', 'rejected']) && $contract->provider_id)
                                                             <button type="button" class="btn btn-xs btn-success py-0.5 px-1.5 btn-whatsapp-notify" data-id="{{ $doc->id }}" data-type="document" title="Cobrar Envio via WhatsApp">
                                                                 <i class="fa-brands fa-whatsapp"></i> Cobrar
                                                             </button>
@@ -935,6 +940,7 @@
     </script>
 @endpush
 
+@if($contract->provider)
 <!-- MODAL DE SELEÇÃO DE CONTATO WHATSAPP -->
 <div class="modal fade" id="whatsappNotifyModal" tabindex="-1" aria-labelledby="whatsappNotifyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -980,4 +986,5 @@
         </div>
     </div>
 </div>
+@endif
 

@@ -163,6 +163,7 @@ class PublicAccessController extends Controller
     public function generateRequestLink(ContractRequest $request)
     {
         abort_if(Auth::user()->isFornecedor(), 403, 'Acesso não autorizado.');
+        abort_if(is_null($request->contract->provider_id), 422, 'Contratos internos não possuem fornecedor para notificar.');
 
         $token = TemporaryAccessToken::generateFor($request);
         $link = route('public.access', $token->token);
@@ -192,6 +193,7 @@ class PublicAccessController extends Controller
     public function generateDocumentLink(ContractDocument $document)
     {
         abort_if(Auth::user()->isFornecedor(), 403, 'Acesso não autorizado.');
+        abort_if(is_null($document->contract->provider_id), 422, 'Contratos internos não possuem fornecedor para notificar.');
 
         $token = TemporaryAccessToken::generateFor($document);
         $link = route('public.access', $token->token);

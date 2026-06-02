@@ -17,6 +17,16 @@
                             Lista de Contratos
                         </h5>
                         <div class="d-flex align-items-center gap-3">
+                            <!-- Filtro de Tipo de Gerenciamento -->
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="filter-management-type" class="fs-7 text-secondary mb-0 d-none d-sm-inline">Gerenciamento:</label>
+                                <select id="filter-management-type" class="form-select form-select-sm" style="width: 170px;">
+                                    <option value="all">Todos</option>
+                                    <option value="with_provider">Com Fornecedor</option>
+                                    <option value="internal">Controle Interno</option>
+                                </select>
+                            </div>
+                            
                             <!-- Alternador Tabela / Cards -->
                             <div class="view-mode-toggle-wrapper">
                                 <button type="button" class="view-mode-btn" id="viewModeTableBtn" title="Visualização em Tabela">
@@ -59,7 +69,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($contracts as $contract)
-                                        <tr>
+                                        <tr class="contract-row" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
                                             <td><strong>{{ $contract->contract_number }}</strong></td>
                                             <td>
                                                 <div class="fw-bold">{{ $contract->title }}</div>
@@ -73,8 +83,13 @@
                                                 <td>{{ $contract->company->name ?? 'N/A' }}</td>
                                             @endif
                                             <td>
-                                                <div class="fw-bold">{{ $contract->provider->name ?? 'N/A' }}</div>
-                                                <span class="text-muted fs-7">CNPJ: {{ $contract->provider->cnpj ?? 'N/A' }}</span>
+                                                @if($contract->provider)
+                                                    <div class="fw-bold">{{ $contract->provider->name }}</div>
+                                                    <span class="text-muted fs-7">CNPJ: {{ $contract->provider->cnpj }}</span>
+                                                @else
+                                                    <div class="fw-bold text-secondary">Controle Interno</div>
+                                                    <span class="text-muted fs-8">Sem fornecedor</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 {{ $contract->start_date->format('d/m/Y') }} a {{ $contract->end_date->format('d/m/Y') }}
@@ -124,6 +139,11 @@
                                             </td>
                                         </tr>
                                     @endforeach
+                                    <tr id="table-empty-row" style="display: none;">
+                                        <td colspan="@if(auth()->user()->isSuperAdmin()) 7 @else 6 @endif" class="text-center py-4 text-muted">
+                                            <i class="fa-solid fa-circle-exclamation me-1"></i> Nenhum contrato corresponde ao filtro selecionado.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -132,7 +152,7 @@
                         <div id="view-card-container" class="p-4 d-none">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($contracts as $contract)
-                                    <div class="col">
+                                    <div class="col card-item" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
                                         <div class="card h-100 shadow-sm border border-light">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -172,7 +192,7 @@
                                                     </p>
                                                 @endif
                                                 <p class="mb-2 fs-7 text-secondary">
-                                                    <strong>Fornecedor:</strong> {{ $contract->provider->name ?? 'N/A' }}
+                                                    <strong>Fornecedor:</strong> {{ $contract->provider->name ?? 'Controle Interno' }}
                                                 </p>
                                                 <p class="mb-2 fs-8 text-muted">
                                                     {{ Str::limit($contract->description, 100) }}
@@ -211,6 +231,9 @@
                                         </div>
                                     </div>
                                 @endforeach
+                                <div id="card-empty-div" class="col-12 text-center py-4 text-muted d-none">
+                                    <i class="fa-solid fa-circle-exclamation me-1"></i> Nenhum contrato corresponde ao filtro selecionado.
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -250,8 +273,8 @@
                                 <!-- Fornecedor -->
                                 <div class="col-md-{{ auth()->user()->isSuperAdmin() ? '6' : '12' }} col-12 mb-3">
                                     <label for="create_provider_id" class="form-label fw-bold">Fornecedor Contratado:</label>
-                                    <select name="provider_id" id="create_provider_id" class="form-select @if($errors->any() && !old('_method')) is-invalid @endif" required>
-                                        <option value="">Selecione o fornecedor...</option>
+                                    <select name="provider_id" id="create_provider_id" class="form-select @if($errors->any() && !old('_method')) is-invalid @endif">
+                                        <option value="">Controle Interno (Sem fornecedor)</option>
                                         @foreach($providers as $provider)
                                             <option value="{{ $provider->id }}" {{ old('provider_id') == $provider->id ? 'selected' : '' }}>
                                                 {{ $provider->name }}
@@ -400,7 +423,8 @@
                                 <!-- Fornecedor -->
                                 <div class="col-md-{{ auth()->user()->isSuperAdmin() ? '6' : '12' }} col-12 mb-3">
                                     <label for="edit_provider_id" class="form-label fw-bold">Fornecedor Contratado:</label>
-                                    <select name="provider_id" id="edit_provider_id" class="form-select @if($errors->any() && old('_method') === 'PUT') is-invalid @endif" required>
+                                    <select name="provider_id" id="edit_provider_id" class="form-select @if($errors->any() && old('_method') === 'PUT') is-invalid @endif">
+                                        <option value="">Controle Interno (Sem fornecedor)</option>
                                         @foreach($providers as $provider)
                                             <option value="{{ $provider->id }}" {{ old('provider_id') == $provider->id ? 'selected' : '' }}>
                                                 {{ $provider->name }}
@@ -539,7 +563,7 @@
                         editForm.setAttribute('action', actionUrl);
                         editIdInput.value = id;
                         if (editCompanyInput) editCompanyInput.value = companyId;
-                        editProviderInput.value = providerId;
+                        editProviderInput.value = (providerId && providerId !== 'null') ? providerId : '';
                         if (editResponsibleInput) editResponsibleInput.value = responsibleId !== 'null' ? responsibleId : '';
                         editContractNumberInput.value = contractNumber;
                         editTitleInput.value = title;
@@ -610,6 +634,64 @@
                 
                 toggleTableBtn.addEventListener('click', () => setMode('table'));
                 toggleCardBtn.addEventListener('click', () => setMode('card'));
+            }
+
+            // Client-side filtering logic
+            const filterSelect = document.getElementById('filter-management-type');
+            if (filterSelect) {
+                filterSelect.addEventListener('change', function() {
+                    const filterValue = this.value; // 'all', 'with_provider', 'internal'
+                    
+                    // Filter table rows
+                    const tableRows = document.querySelectorAll('.contract-row');
+                    tableRows.forEach(row => {
+                        const managementType = row.getAttribute('data-management-type');
+                        if (filterValue === 'all' || managementType === filterValue) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Filter card items
+                    const cardItems = document.querySelectorAll('.card-item');
+                    cardItems.forEach(card => {
+                        const managementType = card.getAttribute('data-management-type');
+                        if (filterValue === 'all' || managementType === filterValue) {
+                            card.classList.remove('d-none');
+                        } else {
+                            card.classList.add('d-none');
+                        }
+                    });
+
+                    // Check if table empty
+                    let visibleTableCount = 0;
+                    tableRows.forEach(row => {
+                        if (row.style.display !== 'none') {
+                            visibleTableCount++;
+                        }
+                    });
+                    const tableEmptyRow = document.getElementById('table-empty-row');
+                    if (tableEmptyRow) {
+                        tableEmptyRow.style.display = visibleTableCount === 0 ? '' : 'none';
+                    }
+
+                    // Check if card empty
+                    let visibleCardCount = 0;
+                    cardItems.forEach(card => {
+                        if (!card.classList.contains('d-none')) {
+                            visibleCardCount++;
+                        }
+                    });
+                    const cardEmptyDiv = document.getElementById('card-empty-div');
+                    if (cardEmptyDiv) {
+                        if (visibleCardCount === 0) {
+                            cardEmptyDiv.classList.remove('d-none');
+                        } else {
+                            cardEmptyDiv.classList.add('d-none');
+                        }
+                    }
+                });
             }
         });
     </script>
