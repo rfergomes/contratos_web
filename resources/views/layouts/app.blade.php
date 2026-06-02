@@ -40,7 +40,7 @@
                     <!-- Notifications Dropdown Menu -->
                     <li class="nav-item dropdown">
                         <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                            <i class="fa fa-solid fa-bell"></i>
+                            <i class="fa fa-solid fa-bell fs-5"></i>
                             @if($navbarAlertsCount > 0)
                                 <span class="navbar-badge badge text-bg-warning">{{ $navbarAlertsCount }}</span>
                             @endif
