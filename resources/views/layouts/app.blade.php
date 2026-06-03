@@ -293,10 +293,10 @@
 
         <!-- Sidebar -->
         <aside class="app-sidebar bg-dark shadow" data-bs-theme="dark">
-            <div class="sidebar-brand p-0 border-bottom border-secondary" style="height: 56px;">
-                <a href="{{ route('dashboard') }}" class="w-100 h-100 p-0 d-flex align-items-center justify-content-center">
+            <div class="sidebar-brand p-0 border-bottom border-secondary" style="height: 56px; background-color: #ffffff; overflow: hidden;">
+                <a href="{{ route('dashboard') }}" class="w-100 h-100 p-0 d-flex align-items-center justify-content-center" style="background-color: #ffffff;">
                     <!-- Logotipo -->
-                    <img src="{{ asset('images/logo_contratos.png') }}" alt="Logo ContratosWeb" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ asset('images/logo_contratos.png') }}" alt="Logo ContratosWeb" style="width: 100%; height: 100%; object-fit: contain; background-color: #ffffff;">
                 </a>
             </div>
 
