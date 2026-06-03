@@ -294,11 +294,13 @@
         <!-- Sidebar -->
         <aside class="app-sidebar bg-dark shadow" data-bs-theme="dark">
             <div class="sidebar-brand text-center p-3 border-bottom border-secondary">
-                <a href="{{ route('dashboard') }}" class="brand-link text-decoration-none text-white fs-4">
-                    <i class="fa-solid fa-file-signature me-2 text-primary"></i>
+                <a href="{{ route('dashboard') }}" class="brand-link text-decoration-none text-white fs-4 d-flex align-items-center justify-content-center">
+                    <!-- Logotipo -->
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo ContratosWeb" class="brand-image me-2" style="max-height: 33px; width: auto;">
                     <span class="brand-text">Contratos<strong>Web</strong></span>
                 </a>
             </div>
+
             
             <div class="sidebar-wrapper">
                 <nav class="mt-3">
