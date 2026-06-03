@@ -294,7 +294,7 @@
         <!-- Sidebar -->
         <aside class="app-sidebar bg-dark shadow" data-bs-theme="dark">
             <div class="sidebar-brand p-0 border-bottom border-secondary" style="height: 60px; overflow: hidden;">
-                <a href="{{ route('dashboard') }}" class="w-100 h-100 p-0 d-flex align-items-center justify-content-center">
+                <a href="{{ route('dashboard') }}" class="w-100 h-100 p-0">
                     <!-- Logotipo/Brand -->
                     <img src="{{ asset('images/logo_transparente.png') }}" alt="Logo ContratosWeb" style="width: 100%; height: 100%; object-fit: contain;">
                 </a>
