@@ -26,6 +26,18 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
+        // Verifica se houve erro de upload no PHP (ex: tamanho excede upload_max_filesize)
+        if ($request->has('profile_photo') && $request->file('profile_photo') && !$request->file('profile_photo')->isValid()) {
+            $file = $request->file('profile_photo');
+            $errorMsg = 'Falha no upload da imagem. ';
+            if ($file->getError() === UPLOAD_ERR_INI_SIZE) {
+                $errorMsg .= 'O arquivo é muito grande para o servidor. O limite máximo do PHP (upload_max_filesize) foi excedido.';
+            } else {
+                $errorMsg .= 'Erro do PHP: ' . $file->getError();
+            }
+            return back()->withErrors(['profile_photo' => $errorMsg])->withInput();
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
