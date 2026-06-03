@@ -297,7 +297,6 @@
                 <a href="{{ route('dashboard') }}" class="brand-link text-decoration-none text-white fs-4 d-flex align-items-center justify-content-center">
                     <!-- Logotipo -->
                     <img src="{{ asset('images/logo_contratos.png') }}" alt="Logo ContratosWeb" class="brand-image me-2" style="max-height: 33px; width: auto;">
-                    <span class="brand-text">Contratos<strong>Web</strong></span>
                 </a>
             </div>
 
