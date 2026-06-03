@@ -395,5 +395,16 @@ body {
     }
 }
 
+/* --- COLOR THEME SELECTOR --- */
+[data-bs-theme-value] .fa-check-lg,
+[data-bs-theme-value] .fa-check {
+    display: none !important;
+}
+[data-bs-theme-value].active .fa-check-lg,
+[data-bs-theme-value].active .fa-check {
+    display: inline-block !important;
+}
+
+
 
 

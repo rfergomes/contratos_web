@@ -26,15 +26,24 @@
                                     <option value="internal">Controle Interno</option>
                                 </select>
                             </div>
+                            <!-- Pesquisar -->
+                            <div class="input-group input-group-sm" style="width: 14rem">
+                                <input type="search" class="form-control" id="searchFilter" placeholder="Pesquisar..." aria-label="Pesquisar">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search" aria-hidden="true"></i>
+                                </span>
+                            </div>
                             
-                            <!-- Alternador Tabela / Cards -->
-                            <div class="view-mode-toggle-wrapper">
-                                <button type="button" class="view-mode-btn" id="viewModeTableBtn" title="Visualização em Tabela">
-                                    <i class="fa-solid fa-list-ul"></i>
-                                </button>
-                                <button type="button" class="view-mode-btn" id="viewModeCardBtn" title="Visualização em Cards">
-                                    <i class="fa-solid fa-table-cells-large"></i>
-                                </button>
+                            <!-- Alternador Tabela / Cards (AdminLTE btn-group) -->
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Modo de visualização">
+                                <input type="radio" class="btn-check" name="viewMode" id="viewModeCardBtn" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="viewModeCardBtn" title="Visualização em Cards">
+                                    <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="viewModeTableBtn" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="viewModeTableBtn" title="Visualização em Tabela">
+                                    <i class="bi bi-list-ul" aria-hidden="true"></i>
+                                </label>
                             </div>
                             @if(!auth()->user()->isFornecedor())
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createContractModal">
@@ -160,13 +169,9 @@
                         <div id="view-card-container" class="p-4 d-none">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                                 @foreach($contracts as $contract)
-<<<<<<< HEAD
                                     <div class="col card-item" data-management-type="{{ $contract->isInternal() ? 'internal' : 'with_provider' }}">
                                         <div class="card h-100 card-secondary card-outline shadow-sm">
-=======
-                                    <div class="col card-item" data-management-type="{{ $contract->provider_id ? 'with_provider' : 'internal' }}">
-                                        <div class="card h-100 card-info card-outline shadow-sm">
->>>>>>> 31e793596f59ce9ef29177b269c2af658acdb50c
+
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                                     <div class="d-flex align-items-center">
@@ -700,91 +705,93 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toggleTableBtn = document.getElementById('viewModeTableBtn');
-            const toggleCardBtn = document.getElementById('viewModeCardBtn');
+            const toggleTableRadio = document.getElementById('viewModeTableBtn');
+            const toggleCardRadio = document.getElementById('viewModeCardBtn');
             const tableContainer = document.getElementById('view-table-container');
             const cardContainer = document.getElementById('view-card-container');
             
-            if (toggleTableBtn && toggleCardBtn && tableContainer && cardContainer) {
+            if (toggleTableRadio && toggleCardRadio && tableContainer && cardContainer) {
                 const savedMode = localStorage.getItem('view_mode_contracts') || 'table';
                 
                 const setMode = (mode) => {
                     if (mode === 'card') {
                         tableContainer.classList.add('d-none');
                         cardContainer.classList.remove('d-none');
-                        toggleTableBtn.classList.remove('active');
-                        toggleCardBtn.classList.add('active');
+                        toggleCardRadio.checked = true;
                     } else {
                         tableContainer.classList.remove('d-none');
                         cardContainer.classList.add('d-none');
-                        toggleTableBtn.classList.add('active');
-                        toggleCardBtn.classList.remove('active');
+                        toggleTableRadio.checked = true;
                     }
                     localStorage.setItem('view_mode_contracts', mode);
                 };
                 
                 setMode(savedMode);
                 
-                toggleTableBtn.addEventListener('click', () => setMode('table'));
-                toggleCardBtn.addEventListener('click', () => setMode('card'));
+                toggleTableRadio.addEventListener('change', () => setMode('table'));
+                toggleCardRadio.addEventListener('change', () => setMode('card'));
             }
 
-            // Client-side filtering logic
+            // Client-side filtering logic (dropdown and search text)
             const filterSelect = document.getElementById('filter-management-type');
-            if (filterSelect) {
-                filterSelect.addEventListener('change', function() {
-                    const filterValue = this.value; // 'all', 'with_provider', 'internal'
-                    
-                    // Filter table rows
-                    const tableRows = document.querySelectorAll('.contract-row');
-                    tableRows.forEach(row => {
-                        const managementType = row.getAttribute('data-management-type');
-                        if (filterValue === 'all' || managementType === filterValue) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
+            const searchInput = document.getElementById('searchFilter');
 
-                    // Filter card items
-                    const cardItems = document.querySelectorAll('.card-item');
-                    cardItems.forEach(card => {
-                        const managementType = card.getAttribute('data-management-type');
-                        if (filterValue === 'all' || managementType === filterValue) {
-                            card.classList.remove('d-none');
-                        } else {
-                            card.classList.add('d-none');
-                        }
-                    });
+            function applyFilters() {
+                const filterValue = filterSelect ? filterSelect.value : 'all';
+                const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-                    // Check if table empty
-                    let visibleTableCount = 0;
-                    tableRows.forEach(row => {
-                        if (row.style.display !== 'none') {
-                            visibleTableCount++;
-                        }
-                    });
-                    const tableEmptyRow = document.getElementById('table-empty-row');
-                    if (tableEmptyRow) {
-                        tableEmptyRow.style.display = visibleTableCount === 0 ? '' : 'none';
-                    }
+                // Filter table rows
+                const tableRows = document.querySelectorAll('.contract-row');
+                let visibleTableCount = 0;
+                tableRows.forEach(row => {
+                    const managementType = row.getAttribute('data-management-type');
+                    const textMatches = row.textContent.toLowerCase().includes(searchQuery);
+                    const typeMatches = filterValue === 'all' || managementType === filterValue;
 
-                    // Check if card empty
-                    let visibleCardCount = 0;
-                    cardItems.forEach(card => {
-                        if (!card.classList.contains('d-none')) {
-                            visibleCardCount++;
-                        }
-                    });
-                    const cardEmptyDiv = document.getElementById('card-empty-div');
-                    if (cardEmptyDiv) {
-                        if (visibleCardCount === 0) {
-                            cardEmptyDiv.classList.remove('d-none');
-                        } else {
-                            cardEmptyDiv.classList.add('d-none');
-                        }
+                    if (typeMatches && textMatches) {
+                        row.style.display = '';
+                        visibleTableCount++;
+                    } else {
+                        row.style.display = 'none';
                     }
                 });
+
+                const tableEmptyRow = document.getElementById('table-empty-row');
+                if (tableEmptyRow) {
+                    tableEmptyRow.style.display = visibleTableCount === 0 ? '' : 'none';
+                }
+
+                // Filter card items
+                const cardItems = document.querySelectorAll('.card-item');
+                let visibleCardCount = 0;
+                cardItems.forEach(card => {
+                    const managementType = card.getAttribute('data-management-type');
+                    const textMatches = card.textContent.toLowerCase().includes(searchQuery);
+                    const typeMatches = filterValue === 'all' || managementType === filterValue;
+
+                    if (typeMatches && textMatches) {
+                        card.classList.remove('d-none');
+                        visibleCardCount++;
+                    } else {
+                        card.classList.add('d-none');
+                    }
+                });
+
+                const cardEmptyDiv = document.getElementById('card-empty-div');
+                if (cardEmptyDiv) {
+                    if (visibleCardCount === 0) {
+                        cardEmptyDiv.classList.remove('d-none');
+                    } else {
+                        cardEmptyDiv.classList.add('d-none');
+                    }
+                }
+            }
+
+            if (filterSelect) {
+                filterSelect.addEventListener('change', applyFilters);
+            }
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
             }
         });
     </script>

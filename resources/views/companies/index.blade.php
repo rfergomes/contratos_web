@@ -17,14 +17,23 @@
                             Lista de Empresas
                         </h5>
                         <div class="d-flex align-items-center gap-3">
-                            <!-- Alternador Tabela / Cards -->
-                            <div class="view-mode-toggle-wrapper">
-                                <button type="button" class="view-mode-btn" id="viewModeTableBtn" title="Visualização em Tabela">
-                                    <i class="fa-solid fa-list-ul"></i>
-                                </button>
-                                <button type="button" class="view-mode-btn" id="viewModeCardBtn" title="Visualização em Cards">
-                                    <i class="fa-solid fa-table-cells-large"></i>
-                                </button>
+                            <!-- Pesquisar -->
+                            <div class="input-group input-group-sm" style="width: 14rem">
+                                <input type="search" class="form-control" id="searchFilter" placeholder="Pesquisar..." aria-label="Pesquisar">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <!-- Alternador Tabela / Cards (AdminLTE btn-group) -->
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Modo de visualização">
+                                <input type="radio" class="btn-check" name="viewMode" id="viewModeCardBtn" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="viewModeCardBtn" title="Visualização em Cards">
+                                    <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                                </label>
+                                <input type="radio" class="btn-check" name="viewMode" id="viewModeTableBtn" autocomplete="off">
+                                <label class="btn btn-outline-secondary" for="viewModeTableBtn" title="Visualização em Tabela">
+                                    <i class="bi bi-list-ul" aria-hidden="true"></i>
+                                </label>
                             </div>
                             <!-- Botão Nova Empresa -->
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
@@ -275,34 +284,45 @@
                 @endif
             @endif
 
-            // View Mode Toggle
-            const toggleTableBtn = document.getElementById('viewModeTableBtn');
-            const toggleCardBtn = document.getElementById('viewModeCardBtn');
+            // View Mode Toggle (AdminLTE btn-group radio)
+            const toggleTableRadio = document.getElementById('viewModeTableBtn');
+            const toggleCardRadio = document.getElementById('viewModeCardBtn');
             const tableContainer = document.getElementById('view-table-container');
             const cardContainer = document.getElementById('view-card-container');
             
-            if (toggleTableBtn && toggleCardBtn && tableContainer && cardContainer) {
+            if (toggleTableRadio && toggleCardRadio && tableContainer && cardContainer) {
                 const savedMode = localStorage.getItem('view_mode_companies') || 'table';
                 
                 const setMode = (mode) => {
                     if (mode === 'card') {
                         tableContainer.classList.add('d-none');
                         cardContainer.classList.remove('d-none');
-                        toggleTableBtn.classList.remove('active');
-                        toggleCardBtn.classList.add('active');
+                        toggleCardRadio.checked = true;
                     } else {
                         tableContainer.classList.remove('d-none');
                         cardContainer.classList.add('d-none');
-                        toggleTableBtn.classList.add('active');
-                        toggleCardBtn.classList.remove('active');
+                        toggleTableRadio.checked = true;
                     }
                     localStorage.setItem('view_mode_companies', mode);
                 };
                 
                 setMode(savedMode);
                 
-                toggleTableBtn.addEventListener('click', () => setMode('table'));
-                toggleCardBtn.addEventListener('click', () => setMode('card'));
+                toggleTableRadio.addEventListener('change', () => setMode('table'));
+                toggleCardRadio.addEventListener('change', () => setMode('card'));
+            }
+            // Client-side Search Filter
+            const searchInput = document.getElementById('searchFilter');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    document.querySelectorAll('#view-table-container tbody tr').forEach(row => {
+                        row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+                    });
+                    document.querySelectorAll('#view-card-container .col').forEach(card => {
+                        card.style.display = card.textContent.toLowerCase().includes(query) ? '' : 'none';
+                    });
+                });
             }
         });
     </script>
