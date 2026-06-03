@@ -296,7 +296,7 @@
             <div class="sidebar-brand p-0 border-bottom border-secondary" style="height: 56px; overflow: hidden;">
                 <a href="{{ route('dashboard') }}" class="w-100 h-100 p-0 d-flex align-items-center justify-content-center">
                     <!-- Logotipo -->
-                    <img src="{{ asset('images/logo_contratos.png') }}" alt="Logo ContratosWeb" style="width: 100%; height: 100%; object-fit: contain;">
+                    <img src="{{ asset('images/logo_transparente.png') }}" alt="Logo ContratosWeb" style="width: 100%; height: 100%; object-fit: contain;">
                 </a>
             </div>
 
