@@ -37,7 +37,7 @@
                             </div>
                             @if(!auth()->user()->isFornecedor())
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createProviderModal">
-                                    <i class="fa-solid fa-plus me-1"></i> Novo Fornecedor
+                                    <i class="fa-solid fa-plus me-1"></i> Novo
                                 </button>
                             @endif
                         </div>

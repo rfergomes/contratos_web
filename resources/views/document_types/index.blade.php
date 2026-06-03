@@ -36,7 +36,7 @@
                                 </label>
                             </div>
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createDocTypeModal">
-                                <i class="fa-solid fa-plus me-1"></i> Novo Tipo de Documento
+                                <i class="fa-solid fa-plus me-1"></i> Novo
                             </button>
                         </div>
                     </div>

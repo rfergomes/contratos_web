@@ -36,7 +36,7 @@
                                 </label>
                             </div>
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                                <i class="fa-solid fa-user-plus me-1"></i> Novo Usuário
+                                <i class="fa-solid fa-user-plus me-1"></i> Novo
                             </button>
                         </div>
                     </div>

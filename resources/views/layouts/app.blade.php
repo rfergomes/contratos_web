@@ -7,94 +7,6 @@
     
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <!-- Color Mode Toggler -->
-    <script>
-        (() => {
-            "use strict";
-
-            const storedTheme = localStorage.getItem("theme");
-
-            const getPreferredTheme = () => {
-                if (storedTheme) {
-                    return storedTheme;
-                }
-
-                return window.matchMedia("(prefers-color-scheme: dark)").matches
-                    ? "dark"
-                    : "light";
-            };
-
-            const setTheme = function (theme) {
-                if (
-                    theme === "auto" &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches
-                ) {
-                    document.documentElement.setAttribute("data-bs-theme", "dark");
-                } else {
-                    document.documentElement.setAttribute("data-bs-theme", theme);
-                }
-            };
-
-            setTheme(getPreferredTheme());
-
-            const showActiveTheme = (theme, focus = false) => {
-                const themeSwitcher = document.querySelector("#bd-theme");
-
-                if (!themeSwitcher) {
-                    return;
-                }
-
-                const themeSwitcherText = document.querySelector("#bd-theme-text");
-                const activeThemeIcon = document.querySelector(".theme-icon-active i");
-                const btnToActive = document.querySelector(
-                    `[data-bs-theme-value="${theme}"]`
-                );
-                if (!btnToActive) return;
-                
-                const svgOfActiveBtn = btnToActive.querySelector("i").getAttribute("class");
-
-                for (const element of document.querySelectorAll("[data-bs-theme-value]")) {
-                    element.classList.remove("active");
-                    element.setAttribute("aria-pressed", "false");
-                }
-
-                btnToActive.classList.add("active");
-                btnToActive.setAttribute("aria-pressed", "true");
-                activeThemeIcon.setAttribute("class", svgOfActiveBtn);
-                
-                if (themeSwitcherText) {
-                    const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`;
-                    themeSwitcher.setAttribute("aria-label", themeSwitcherLabel);
-                }
-
-                if (focus) {
-                    themeSwitcher.focus();
-                }
-            };
-
-            window
-                .matchMedia("(prefers-color-scheme: dark)")
-                .addEventListener("change", () => {
-                    if (storedTheme !== "light" || storedTheme !== "dark") {
-                        setTheme(getPreferredTheme());
-                    }
-                });
-
-            window.addEventListener("DOMContentLoaded", () => {
-                showActiveTheme(getPreferredTheme());
-
-                for (const toggle of document.querySelectorAll("[data-bs-theme-value]")) {
-                    toggle.addEventListener("click", () => {
-                        const theme = toggle.getAttribute("data-bs-theme-value");
-                        localStorage.setItem("theme", theme);
-                        setTheme(theme);
-                        showActiveTheme(theme, true);
-                    });
-                }
-            });
-        })();
-    </script>
     
     <!-- FontAwesome para Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -175,26 +87,26 @@
                     <li class="nav-item dropdown">
                         <span class="d-none" id="bd-theme-text">Alternar tema</span>
                         <a class="nav-link theme-icon-active" href="#" id="bd-theme" aria-label="Toggle color scheme" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-sun-fill"></i>
+                            <i class="fa-solid fa-cloud-sun"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme" style="--bs-dropdown-min-width: 8rem">
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
-                                    <i class="fa-solid fa-sun-fill me-2"></i>
-                                    Light
+                                    <i class="fa-solid fa-sun me-2"></i>
+                                    Claro
                                     <i class="fa-solid fa-check ms-auto"></i>
                                 </button>
                             </li>
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
-                                    <i class="fa-solid fa-moon-fill me-2"></i>
-                                    Dark
+                                    <i class="fa-solid fa-moon me-2"></i>
+                                    Escuro
                                     <i class="fa-solid fa-check ms-auto"></i>
                                 </button>
                             </li>
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
-                                    <i class="fa-solid fa-circle-half me-2"></i>
+                                    <i class="fa-solid fa-circle-half-stroke me-2"></i>
                                     Auto
                                     <i class="fa-solid fa-check ms-auto"></i>
                                 </button>

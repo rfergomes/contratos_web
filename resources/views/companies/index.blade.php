@@ -37,7 +37,7 @@
                             </div>
                             <!-- Botão Nova Empresa -->
                             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createCompanyModal">
-                                <i class="fa-solid fa-plus me-1"></i> Nova Empresa
+                                <i class="fa-solid fa-plus me-1"></i> Nova
                             </button>
                         </div>
                     </div>
