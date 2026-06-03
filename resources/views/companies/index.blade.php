@@ -78,14 +78,17 @@
                                                 </form>
                                             </td>
                                             <td class="text-end px-4">
-                                                <button type="button" class="btn btn-sm btn-primary btn-edit-company" 
-                                                        data-id="{{ $company->id }}"
-                                                        data-name="{{ $company->name }}"
-                                                        data-cnpj="{{ $company->cnpj }}"
-                                                        data-active="{{ $company->active ? '1' : '0' }}"
-                                                        data-url="{{ route('companies.update', $company) }}">
-                                                    <i class="fa-solid fa-pen-to-square"></i> Editar
-                                                </button>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" class="btn btn-outline-primary btn-edit-company" 
+                                                            data-id="{{ $company->id }}"
+                                                            data-name="{{ $company->name }}"
+                                                            data-cnpj="{{ $company->cnpj }}"
+                                                            data-active="{{ $company->active ? '1' : '0' }}"
+                                                            data-url="{{ route('companies.update', $company) }}"
+                                                            title="Editar">
+                                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -121,14 +124,17 @@
                                                             <label class="form-check-label fw-bold text-secondary fs-8 ms-1">{{ $company->active ? 'Ativa' : 'Inativa' }}</label>
                                                         </div>
                                                     </form>
-                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-company"
-                                                            data-id="{{ $company->id }}"
-                                                            data-name="{{ $company->name }}"
-                                                            data-cnpj="{{ $company->cnpj }}"
-                                                            data-active="{{ $company->active ? '1' : '0' }}"
-                                                            data-url="{{ route('companies.update', $company) }}">
-                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
-                                                    </button>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-primary btn-edit-company"
+                                                                data-id="{{ $company->id }}"
+                                                                data-name="{{ $company->name }}"
+                                                                data-cnpj="{{ $company->cnpj }}"
+                                                                data-active="{{ $company->active ? '1' : '0' }}"
+                                                                data-url="{{ route('companies.update', $company) }}"
+                                                                title="Editar">
+                                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

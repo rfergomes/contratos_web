@@ -120,9 +120,9 @@
                                                 @endif
                                             </td>
                                             <td class="text-end px-4">
-                                                <div class="d-flex justify-content-end gap-2">
+                                                <div class="btn-group btn-group-sm" role="group">
                                                     <!-- Edit Button -->
-                                                    <button type="button" class="btn btn-sm btn-primary btn-edit-user"
+                                                    <button type="button" class="btn btn-outline-primary btn-edit-user"
                                                             data-id="{{ $user->id }}"
                                                             data-name="{{ $user->name }}"
                                                             data-email="{{ $user->email }}"
@@ -130,8 +130,9 @@
                                                             data-company-id="{{ $user->company_id }}"
                                                             data-provider-id="{{ $user->provider_id }}"
                                                             data-companies="{{ $user->companies->pluck('id')->toJson() }}"
-                                                            data-url="{{ route('users.update', $user) }}">
-                                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                            data-url="{{ route('users.update', $user) }}"
+                                                            title="Editar">
+                                                        <i class="bi bi-pencil" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -201,17 +202,20 @@
                                                             <label class="form-check-label fw-bold text-secondary fs-8 ms-1">Ativo</label>
                                                         </div>
                                                     @endif
-                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-user"
-                                                            data-id="{{ $user->id }}"
-                                                            data-name="{{ $user->name }}"
-                                                            data-email="{{ $user->email }}"
-                                                            data-role="{{ $user->role }}"
-                                                            data-company-id="{{ $user->company_id }}"
-                                                            data-provider-id="{{ $user->provider_id }}"
-                                                            data-companies="{{ $user->companies->pluck('id')->toJson() }}"
-                                                            data-url="{{ route('users.update', $user) }}">
-                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
-                                                    </button>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-primary btn-edit-user"
+                                                                data-id="{{ $user->id }}"
+                                                                data-name="{{ $user->name }}"
+                                                                data-email="{{ $user->email }}"
+                                                                data-role="{{ $user->role }}"
+                                                                data-company-id="{{ $user->company_id }}"
+                                                                data-provider-id="{{ $user->provider_id }}"
+                                                                data-companies="{{ $user->companies->pluck('id')->toJson() }}"
+                                                                data-url="{{ route('users.update', $user) }}"
+                                                                title="Editar">
+                                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

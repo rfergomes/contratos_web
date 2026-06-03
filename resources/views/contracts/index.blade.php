@@ -130,12 +130,12 @@
                                                 @endswitch
                                             </td>
                                             <td class="text-end px-4">
-                                                <div class="d-flex justify-content-end gap-2">
-                                                    <a href="{{ route('contracts.show', $contract) }}" class="btn btn-sm btn-outline-info" title="Visualizar Linha do Tempo e Solicitações">
-                                                        <i class="fa-solid fa-eye"></i> Detalhes
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-info" title="Visualizar Detalhes">
+                                                        <i class="bi bi-eye" aria-hidden="true"></i>
                                                     </a>
                                                     @if(!auth()->user()->isFornecedor())
-                                                        <button type="button" class="btn btn-sm btn-primary btn-edit-contract"
+                                                        <button type="button" class="btn btn-outline-primary btn-edit-contract"
                                                                 data-id="{{ $contract->id }}"
                                                                 data-company-id="{{ $contract->company_id }}"
                                                                 data-provider-id="{{ $contract->provider_id }}"
@@ -148,8 +148,9 @@
                                                                 data-alert-days="{{ $contract->alert_days }}"
                                                                 data-status="{{ $contract->status }}"
                                                                 data-management-type="{{ $contract->management_type }}"
-                                                                data-url="{{ route('contracts.update', $contract) }}">
-                                                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                                data-url="{{ route('contracts.update', $contract) }}"
+                                                                title="Editar">
+                                                            <i class="bi bi-pencil" aria-hidden="true"></i>
                                                         </button>
                                                     @endif
                                                 </div>
@@ -228,28 +229,31 @@
                                                     <span class="d-block"><i class="fa-solid fa-bell me-1 text-warning"></i> Alerta de renovação: {{ $contract->alert_days }} dias</span>
                                                 </div>
                                                 
-                                                <div class="d-flex justify-content-end gap-2 border-top pt-3">
-                                                    <a href="{{ route('contracts.show', $contract) }}" class="btn btn-xs btn-outline-info">
-                                                        <i class="fa-solid fa-eye me-1"></i> Detalhes
-                                                    </a>
-                                                    @if(!auth()->user()->isFornecedor())
-                                                        <button type="button" class="btn btn-xs btn-primary btn-edit-contract"
-                                                                data-id="{{ $contract->id }}"
-                                                                data-company-id="{{ $contract->company_id }}"
-                                                                data-provider-id="{{ $contract->provider_id }}"
-                                                                data-responsible-id="{{ $contract->responsible_id }}"
-                                                                data-contract-number="{{ $contract->contract_number }}"
-                                                                data-title="{{ $contract->title }}"
-                                                                data-description="{{ $contract->description }}"
-                                                                data-start-date="{{ $contract->start_date->format('Y-m-d') }}"
-                                                                data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
-                                                                data-alert-days="{{ $contract->alert_days }}"
-                                                                data-status="{{ $contract->status }}"
-                                                                data-management-type="{{ $contract->management_type }}"
-                                                                data-url="{{ route('contracts.update', $contract) }}">
-                                                            <i class="fa-solid fa-pen-to-square me-1"></i> Editar
-                                                        </button>
-                                                    @endif
+                                                <div class="d-flex justify-content-end border-top pt-3">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-info" title="Visualizar Detalhes">
+                                                            <i class="bi bi-eye" aria-hidden="true"></i>
+                                                        </a>
+                                                        @if(!auth()->user()->isFornecedor())
+                                                            <button type="button" class="btn btn-outline-primary btn-edit-contract"
+                                                                    data-id="{{ $contract->id }}"
+                                                                    data-company-id="{{ $contract->company_id }}"
+                                                                    data-provider-id="{{ $contract->provider_id }}"
+                                                                    data-responsible-id="{{ $contract->responsible_id }}"
+                                                                    data-contract-number="{{ $contract->contract_number }}"
+                                                                    data-title="{{ $contract->title }}"
+                                                                    data-description="{{ $contract->description }}"
+                                                                    data-start-date="{{ $contract->start_date->format('Y-m-d') }}"
+                                                                    data-end-date="{{ $contract->end_date->format('Y-m-d') }}"
+                                                                    data-alert-days="{{ $contract->alert_days }}"
+                                                                    data-status="{{ $contract->status }}"
+                                                                    data-management-type="{{ $contract->management_type }}"
+                                                                    data-url="{{ route('contracts.update', $contract) }}"
+                                                                    title="Editar">
+                                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

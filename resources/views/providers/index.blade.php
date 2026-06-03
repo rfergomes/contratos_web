@@ -86,23 +86,25 @@
                                             </td>
                                             @if(!auth()->user()->isFornecedor())
                                                 <td class="text-end px-4">
-                                                    <div class="d-flex justify-content-end gap-2">
+                                                    <div class="btn-group btn-group-sm" role="group">
                                                         <!-- Contacts Button -->
-                                                        <button type="button" class="btn btn-sm btn-outline-primary btn-contacts-provider" 
+                                                        <button type="button" class="btn btn-outline-info btn-contacts-provider" 
                                                                 data-id="{{ $provider->id }}"
-                                                                data-name="{{ $provider->name }}">
-                                                            <i class="fa-solid fa-users"></i> Contatos
+                                                                data-name="{{ $provider->name }}"
+                                                                title="Contatos">
+                                                            <i class="bi bi-people" aria-hidden="true"></i>
                                                         </button>
 
-                                                        <!-- Edit Button (Abre o modal via JS populando os dados) -->
-                                                        <button type="button" class="btn btn-sm btn-primary btn-edit-provider" 
+                                                        <!-- Edit Button -->
+                                                        <button type="button" class="btn btn-outline-primary btn-edit-provider" 
                                                                 data-id="{{ $provider->id }}"
                                                                 data-name="{{ $provider->name }}"
                                                                 data-cnpj="{{ $provider->cnpj }}"
                                                                 data-email="{{ $provider->email }}"
                                                                 data-phone="{{ $provider->phone }}"
-                                                                data-url="{{ route('providers.update', $provider) }}">
-                                                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                                data-url="{{ route('providers.update', $provider) }}"
+                                                                title="Editar">
+                                                            <i class="bi bi-pencil" aria-hidden="true"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -147,21 +149,23 @@
                                                             <label class="form-check-label fw-bold text-secondary fs-8 ms-1">{{ $provider->active ? 'Ativo' : 'Inativo' }}</label>
                                                         </div>
                                                     </form>
-                                                    <div class="d-flex gap-2">
-                                                        <button type="button" class="btn btn-xs btn-outline-primary btn-contacts-provider" 
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-info btn-contacts-provider" 
                                                                 data-id="{{ $provider->id }}"
-                                                                data-name="{{ $provider->name }}">
-                                                            <i class="fa-solid fa-users"></i>
+                                                                data-name="{{ $provider->name }}"
+                                                                title="Contatos">
+                                                            <i class="bi bi-people" aria-hidden="true"></i>
                                                         </button>
                                                         @if(!auth()->user()->isFornecedor())
-                                                            <button type="button" class="btn btn-xs btn-primary btn-edit-provider"
+                                                            <button type="button" class="btn btn-outline-primary btn-edit-provider"
                                                                     data-id="{{ $provider->id }}"
                                                                     data-name="{{ $provider->name }}"
                                                                     data-cnpj="{{ $provider->cnpj }}"
                                                                     data-email="{{ $provider->email }}"
                                                                     data-phone="{{ $provider->phone }}"
-                                                                    data-url="{{ route('providers.update', $provider) }}">
-                                                                <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                                                                    data-url="{{ route('providers.update', $provider) }}"
+                                                                    title="Editar">
+                                                                <i class="bi bi-pencil" aria-hidden="true"></i>
                                                             </button>
                                                         @endif
                                                     </div>

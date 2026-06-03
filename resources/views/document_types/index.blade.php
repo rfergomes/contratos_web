@@ -87,16 +87,17 @@
                                                 </form>
                                             </td>
                                             <td class="text-end px-4">
-                                                <div class="d-flex justify-content-end gap-2">
+                                                <div class="btn-group btn-group-sm" role="group">
                                                     <!-- Edit Button -->
-                                                    <button type="button" class="btn btn-sm btn-primary btn-edit-doctype" 
+                                                    <button type="button" class="btn btn-outline-primary btn-edit-doctype" 
                                                             data-id="{{ $type->id }}"
                                                             data-name="{{ $type->name }}"
                                                             data-description="{{ $type->description }}"
                                                             data-periodicity="{{ $type->periodicity }}"
                                                             data-required="{{ $type->required ? '1' : '0' }}"
-                                                            data-url="{{ route('document-types.update', $type) }}">
-                                                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                                                            data-url="{{ route('document-types.update', $type) }}"
+                                                            title="Editar">
+                                                        <i class="bi bi-pencil" aria-hidden="true"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -144,15 +145,18 @@
                                                             <label class="form-check-label fw-bold text-secondary fs-8 ms-1">Obrigatório</label>
                                                         </div>
                                                     </form>
-                                                    <button type="button" class="btn btn-xs btn-primary btn-edit-doctype" 
-                                                            data-id="{{ $type->id }}"
-                                                            data-name="{{ $type->name }}"
-                                                            data-description="{{ $type->description }}"
-                                                            data-periodicity="{{ $type->periodicity }}"
-                                                            data-required="{{ $type->required ? '1' : '0' }}"
-                                                            data-url="{{ route('document-types.update', $type) }}">
-                                                        <i class="fa-solid fa-pen-to-square me-1"></i> Editar
-                                                    </button>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-primary btn-edit-doctype" 
+                                                                data-id="{{ $type->id }}"
+                                                                data-name="{{ $type->name }}"
+                                                                data-description="{{ $type->description }}"
+                                                                data-periodicity="{{ $type->periodicity }}"
+                                                                data-required="{{ $type->required ? '1' : '0' }}"
+                                                                data-url="{{ route('document-types.update', $type) }}"
+                                                                title="Editar">
+                                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
