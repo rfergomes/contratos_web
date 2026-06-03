@@ -15,7 +15,17 @@
                         <h5 class="mb-0 text-secondary">
                             <i class="fa-solid fa-users me-2 text-primary"></i>
                             Lista de Usuários
-                        </h5>                       
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="View">
+                            <input type="radio" class="btn-check" name="view" id="viewModeCardBtn" checked="" wfd-id="id1">
+                            <label class="btn btn-outline-secondary" for="view-grid">
+                                <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                            </label>
+                            <input type="radio" class="btn-check" name="view" id="viewModeTableBtn" wfd-id="id2">
+                            <label class="btn btn-outline-secondary" for="view-list">
+                                <i class="bi bi-list-ul" aria-hidden="true"></i>
+                            </label>
+                        </div>                      
                         <div class="d-flex align-items-center gap-3">
                             <!-- Alternador Tabela / Cards -->
                             <div class="view-mode-toggle-wrapper">
